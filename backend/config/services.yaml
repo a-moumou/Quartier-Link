@@ -1,0 +1,23 @@
+parameters:
+    app.messages_encryption_key: '%env(MESSAGES_ENCRYPTION_KEY)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Pour le script CLI create_admin.php (le hasher n'est pas public sur le conteneur)
+    app.cli_password_hasher:
+        alias: security.user_password_hasher
+        public: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    App\Service\CryptoService:
+        arguments:
+            $messagesEncryptionKey: '%app.messages_encryption_key%'

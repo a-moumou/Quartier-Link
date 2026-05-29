@@ -1,0 +1,25 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        use_savepoints: true
+        mapping_types:
+            verification_status: string
+            address_status: string
+            join_status: string
+            member_role: string
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
+
+doctrine_migrations:
+    migrations_paths:
+        'App\Migrations': '%kernel.project_dir%/migrations'
+    enable_profiler: false
