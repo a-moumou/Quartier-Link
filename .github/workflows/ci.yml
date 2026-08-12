@@ -18,7 +18,7 @@ jobs:
       - name: Installer PHP 8.2
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
 
       - name: Verifier la syntaxe PHP
         working-directory: backend
@@ -50,7 +50,7 @@ jobs:
       - name: Installer PHP 8.2
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: pdo_pgsql, intl, mbstring, zip
           tools: composer:v2
 
