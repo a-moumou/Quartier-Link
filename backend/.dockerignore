@@ -1,0 +1,9 @@
+vendor
+var/cache
+var/log
+var/*.log
+.git
+.env.dev
+.env.test
+.phpunit.cache
+tests

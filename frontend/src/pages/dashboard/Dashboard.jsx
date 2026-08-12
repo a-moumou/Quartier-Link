@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Heart, MessageCircle, Trash2, AlertTriangle, ChevronDown, ImagePlus, Loader2, MapPin, Users, Search, Clock, LogOut, ShieldCheck } from 'lucide-react';
+import {
+  Send, Heart, MessageCircle, Trash2, AlertTriangle, ImagePlus, Loader2,
+  MapPin, Users, Search, Clock, LogOut, ShieldCheck, Plus,
+} from 'lucide-react';
+import ComposeSheet from '../../components/layout/ComposeSheet';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../../components/ui/Avatar';
 import Badge from '../../components/ui/Badge';
@@ -14,8 +18,6 @@ function timeAgo(d) {
   if (s < 86400) return `${Math.floor(s / 3600)} h`;
   return `${Math.floor(s / 86400)} j`;
 }
-
-/* ─── Haversine distance (km) ─────────────────────────────────────────────── */
 
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371;
@@ -72,7 +74,6 @@ function QuartierBrowser({ userAddress }) {
         const pendingIds = new Set(requestsRes.data.map((r) => r.quartierId));
         setPending(pendingIds);
 
-        // Geocode quartiers that have an address but no coordinates
         const missing = list.filter((q) => q.latitude == null && (q.address ?? q.adresse));
         if (missing.length > 0) {
           setGeocoding(true);
@@ -83,7 +84,6 @@ function QuartierBrowser({ userAddress }) {
               list = list.map((x) => x.id === q.id ? { ...x, latitude: coords.lat, longitude: coords.lng } : x);
               if (!cancelled) setQuartiers([...list]);
             }
-            // Respect Nominatim's 1 req/s rate limit
             await new Promise((r) => setTimeout(r, 1100));
           }
           if (!cancelled) setGeocoding(false);
@@ -94,7 +94,6 @@ function QuartierBrowser({ userAddress }) {
     };
     load();
 
-    // Geocode the user's profile address to use as reference point
     nominatim(userAddress).then((coords) => {
       if (!cancelled && coords) setUserPos(coords);
     });
@@ -115,7 +114,6 @@ function QuartierBrowser({ userAddress }) {
     }
   };
 
-  // Attach distance to each quartier based on the user's profile address
   const withDistance = quartiers.map((q) => ({
     ...q,
     distance: (userPos && q.latitude != null && q.longitude != null)
@@ -123,7 +121,6 @@ function QuartierBrowser({ userAddress }) {
       : null,
   }));
 
-  // Filter to ≤ 500 m when user position is known, otherwise show all
   const nearbyActive = userPos !== null && withDistance.some((q) => q.distance !== null);
   const visible = nearbyActive
     ? withDistance.filter((q) => q.distance === null || q.distance <= 0.5)
@@ -143,18 +140,15 @@ function QuartierBrowser({ userAddress }) {
 
   if (!isVerified) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Choisissez votre quartier</h1>
-          <p className="text-sm text-slate-500 mt-1">Rejoignez la communauté de votre quartier pour accéder au fil d'actualité</p>
-        </div>
-        <div className="flex items-start gap-3 p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-          <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+      <div className="space-y-5">
+        <div className="flex items-start gap-3 p-4 bg-amber-500/5 border border-amber-500/30 rounded-lg">
+          <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-amber-300">Compte non vérifié</p>
-            <p className="text-xs text-amber-500 mt-1">
-              Votre compte doit être vérifié par un administrateur avant de pouvoir rejoindre un quartier.{' '}
-              <Link to="/profile" className="font-semibold underline">Envoyer un justificatif →</Link>
+            <p className="text-xs text-[#8b949e] mt-1">
+              <Link to="/profile" className="text-emerald-400 hover:text-emerald-300 font-medium">
+                Envoyer un justificatif →
+              </Link>
             </p>
           </div>
         </div>
@@ -163,104 +157,121 @@ function QuartierBrowser({ userAddress }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Choisissez votre quartier</h1>
-        <p className="text-sm text-slate-500 mt-1">Rejoignez la communauté de votre quartier pour accéder au fil d'actualité</p>
+        <h1 className="text-xl font-semibold text-[#e6edf3] tracking-tight">Découvrir des quartiers</h1>
+        <p className="text-sm text-[#8b949e] mt-1">
+          Rejoignez la communauté de votre voisinage.
+        </p>
       </div>
 
       {!userAddress && (
         <>
-          <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+          <div className="flex items-start gap-3 p-4 bg-amber-500/5 border border-amber-500/30 rounded-lg">
             <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-amber-300">Adresse requise pour voir les quartiers</p>
-              <p className="text-xs text-amber-500 mt-0.5">
-                Ajoutez votre adresse dans votre profil pour découvrir les quartiers de votre zone.{' '}
-                <Link to="/profile" className="font-semibold underline">Mettre à jour mon profil →</Link>
+              <p className="text-sm font-semibold text-amber-300">Adresse requise</p>
+              <p className="text-xs text-[#8b949e] mt-1">
+                <Link to="/profile" className="text-emerald-400 hover:text-emerald-300 font-medium">
+                  Mettre à jour mon profil →
+                </Link>
               </p>
             </div>
           </div>
-          <div className="text-center py-16">
-            <MapPin size={40} className="text-slate-700 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">Aucun quartier à afficher</p>
-            <p className="text-slate-600 text-xs mt-1">Renseignez votre adresse pour voir les quartiers proches de chez vous.</p>
+          <div className="text-center py-16 bg-[#161b22] border border-[#30363d] rounded-xl">
+            <MapPin size={36} className="text-[#6e7681] mx-auto mb-3" />
+            <p className="text-[#e6edf3] font-semibold">Aucun quartier à afficher</p>
+            <p className="text-[#8b949e] text-sm mt-1">
+              Renseignez votre adresse pour voir les quartiers proches.
+            </p>
           </div>
         </>
       )}
 
       {userAddress && geocoding && (
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex items-center gap-2 text-xs text-[#8b949e]">
           <Loader2 size={13} className="animate-spin" />
-          <span>Géolocalisation des quartiers en cours…</span>
+          <span>Géolocalisation en cours…</span>
         </div>
       )}
       {userAddress && !geocoding && nearbyActive && (
-        <div className="flex items-center gap-2 text-xs text-indigo-400">
-          <MapPin size={13} />
-          <span>Quartiers proches de votre adresse (&le; 500 m)</span>
+        <div className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-full">
+          <MapPin size={11} />
+          Quartiers à moins de 500 m
         </div>
       )}
 
       {userAddress && (
         <>
           <div className="relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6e7681]" />
             <input
               type="text"
-              placeholder="Rechercher par nom ou adresse..."
+              placeholder="Rechercher un quartier..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-800 border border-white/8 text-white placeholder:text-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+              className="w-full pl-9 pr-3 py-2.5 text-sm bg-[#0f1117] border border-[#30363d] text-[#e6edf3] placeholder:text-[#6e7681] rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
             />
           </div>
 
           {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="bg-slate-900 rounded-2xl border border-white/8 p-5 animate-pulse">
-                  <div className="flex gap-4">
-                    <div className="size-12 bg-slate-800 rounded-xl shrink-0" />
-                    <div className="flex-1 space-y-2"><div className="h-4 bg-slate-800 rounded w-3/4" /><div className="h-3 bg-slate-800/60 rounded w-1/2" /></div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 animate-pulse">
+                  <div className="flex gap-3">
+                    <div className="size-12 bg-[#21262d] rounded-md shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 bg-[#21262d] rounded w-3/4" />
+                      <div className="h-2 bg-[#21262d] rounded w-1/2" />
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16">
-              <MapPin size={40} className="text-slate-700 mx-auto mb-3" />
-              <p className="text-slate-500 font-medium">Aucun quartier trouvé près de vous</p>
+            <div className="text-center py-16 bg-[#161b22] border border-[#30363d] rounded-xl">
+              <MapPin size={36} className="text-[#6e7681] mx-auto mb-3" />
+              <p className="text-[#e6edf3] font-semibold">Aucun quartier trouvé</p>
               {nearbyActive && (
-                <p className="text-slate-600 text-xs mt-1">Essayez de rechercher par nom pour voir tous les quartiers</p>
+                <p className="text-[#8b949e] text-sm mt-1">Essayez une recherche par nom</p>
               )}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map((q) => {
                 const isPending = pending.has(q.id);
                 return (
-                  <div key={q.id} className="bg-slate-900 rounded-2xl border border-white/8 p-5 flex flex-col gap-4 hover:border-indigo-500/30 transition-colors">
+                  <div
+                    key={q.id}
+                    className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 flex flex-col gap-4 ql-hover-border transition-colors"
+                  >
                     <div className="flex items-start gap-3">
-                      <div className="size-12 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm shadow-indigo-500/20">
-                        <span className="text-white font-bold text-lg">{(q.nom ?? q.name)?.[0]?.toUpperCase()}</span>
+                      <div className="size-12 bg-emerald-500/10 border border-emerald-500/30 rounded-md flex items-center justify-center shrink-0">
+                        <span className="text-emerald-400 font-bold text-lg">
+                          {(q.nom ?? q.name)?.[0]?.toUpperCase()}
+                        </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-white truncate">{q.nom ?? q.name}</h3>
+                          <h3 className="font-semibold text-[#e6edf3] truncate">{q.nom ?? q.name}</h3>
                           {isPending && <Badge variant="warning"><Clock size={10} /> Demandé</Badge>}
                         </div>
-                        <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500">
+                        <div className="flex items-center gap-1.5 mt-1 text-xs text-[#8b949e]">
                           <MapPin size={11} /><span className="truncate">{q.adresse ?? q.address}</span>
                         </div>
                         {q.distance !== null && (
-                          <p className="text-[10px] text-indigo-400/70 mt-0.5">{q.distance < 1 ? `${Math.round(q.distance * 1000)} m` : `${q.distance.toFixed(1)} km`}</p>
+                          <p className="text-[10px] text-emerald-400 font-medium mt-0.5">
+                            {q.distance < 1 ? `${Math.round(q.distance * 1000)} m` : `${q.distance.toFixed(1)} km`}
+                          </p>
                         )}
                       </div>
                     </div>
-                    {q.description && <p className="text-sm text-slate-400 leading-relaxed line-clamp-2">{q.description}</p>}
+                    {q.description && (
+                      <p className="text-sm text-[#8b949e] leading-relaxed line-clamp-2">{q.description}</p>
+                    )}
                     <div className="flex items-center justify-between pt-1">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Users size={13} /> {q.membres ?? 0} membres
+                      <div className="flex items-center gap-1.5 text-xs text-[#8b949e]">
+                        <Users size={12} /> {q.membres ?? 0} membres
                       </div>
                       <Button
                         size="xs"
@@ -283,7 +294,7 @@ function QuartierBrowser({ userAddress }) {
   );
 }
 
-/* ─── Post card (feed) ────────────────────────────────────────────────────── */
+/* ─── Post card ───────────────────────────────────────────────────────────── */
 
 function PostCard({ post, currentUser, onDelete }) {
   const name = `${post.author?.firstName ?? ''} ${post.author?.lastName ?? ''}`.trim();
@@ -324,34 +335,37 @@ function PostCard({ post, currentUser, onDelete }) {
     setSendingComment(true);
     try {
       const res = await api.post(`/posts/${post.id}/comments`, { content: newComment.trim() });
-      setComments((prev) => [...prev, res.data]); setCommentsCount((c) => c + 1); setNewComment('');
+      setComments((prev) => [...prev, res.data]);
+      setCommentsCount((c) => c + 1);
+      setNewComment('');
     } catch { /* ignore */ } finally { setSendingComment(false); }
   };
 
   const deleteComment = async (commentId) => {
     try {
       await api.delete(`/posts/${post.id}/comments/${commentId}`);
-      setComments((prev) => prev.filter((c) => c.id !== commentId)); setCommentsCount((c) => c - 1);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      setCommentsCount((c) => c - 1);
     } catch { /* ignore */ }
   };
 
   return (
-    <div className="bg-slate-900 rounded-2xl border border-white/8">
+    <article className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
       <div className="p-5">
-        <div className="flex items-start justify-between gap-3">
+        <header className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
             <Avatar name={name} size="md" />
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-semibold text-white">{name}</span>
+                <span className="text-sm font-semibold text-[#e6edf3]">{name}</span>
                 {post.author?.isAdmin && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
                     <ShieldCheck size={10} /> Admin
                   </span>
                 )}
                 {post.author?.isVerified && <Badge variant="success">Vérifié</Badge>}
               </div>
-              <div className="flex items-center gap-1.5 mt-0.5 text-xs text-slate-600">
+              <div className="flex items-center gap-1.5 mt-0.5 text-xs text-[#8b949e]">
                 <span>{post.quartierNom ?? 'Quartier'}</span>
                 <span>·</span>
                 <span>{timeAgo(post.createdAt)}</span>
@@ -359,60 +373,101 @@ function PostCard({ post, currentUser, onDelete }) {
             </div>
           </div>
           {post.author?.id === currentUser?.id && (
-            <button onClick={() => onDelete(post.id)} className="p-1.5 rounded-lg text-slate-700 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
+            <button
+              onClick={() => onDelete(post.id)}
+              className="p-1.5 rounded-md text-[#8b949e] hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
+              aria-label="Supprimer la publication"
+            >
               <Trash2 size={14} />
             </button>
           )}
-        </div>
-        <p className="mt-3.5 text-sm text-slate-300 leading-relaxed">{post.content}</p>
-        <div className="mt-4 pt-3.5 border-t border-white/5 flex items-center gap-4">
-          <button onClick={toggleLike} className={['flex items-center gap-1.5 text-xs font-medium transition-colors', liked ? 'text-rose-400' : 'text-slate-600 hover:text-rose-400'].join(' ')}>
-            <Heart size={14} className={liked ? 'fill-rose-400' : ''} />
+        </header>
+
+        <p className="mt-3.5 text-sm text-[#e6edf3] leading-relaxed whitespace-pre-wrap">
+          {post.content}
+        </p>
+
+        <footer className="mt-4 pt-3.5 border-t border-[#30363d]/80 flex items-center gap-5">
+          <button
+            onClick={toggleLike}
+            className={[
+              'flex items-center gap-1.5 text-xs font-medium transition-colors',
+              liked ? 'text-red-400' : 'text-[#8b949e] hover:text-red-400',
+            ].join(' ')}
+          >
+            <Heart size={14} className={liked ? 'fill-red-400' : ''} />
             {likesCount > 0 ? likesCount : 'J\'aime'}
           </button>
-          <button onClick={toggleComments} className={['flex items-center gap-1.5 text-xs font-medium transition-colors', commentsOpen ? 'text-indigo-400' : 'text-slate-600 hover:text-indigo-400'].join(' ')}>
+          <button
+            onClick={toggleComments}
+            className={[
+              'flex items-center gap-1.5 text-xs font-medium transition-colors',
+              commentsOpen ? 'text-emerald-400' : 'text-[#8b949e] hover:text-emerald-400',
+            ].join(' ')}
+          >
             <MessageCircle size={14} />
             {commentsCount > 0 ? commentsCount : 'Commenter'}
           </button>
-        </div>
+        </footer>
       </div>
 
       {commentsOpen && (
-        <div className="border-t border-white/5 px-5 py-4 space-y-3">
-          {!commentsLoaded && <div className="flex justify-center py-2"><Loader2 size={16} className="animate-spin text-slate-600" /></div>}
-          {commentsLoaded && comments.length === 0 && <p className="text-xs text-slate-600 text-center py-1">Aucun commentaire. Soyez le premier !</p>}
+        <div className="border-t border-[#30363d]/80 px-5 py-4 space-y-3 bg-[#0f1117]/40">
+          {!commentsLoaded && (
+            <div className="flex justify-center py-2">
+              <Loader2 size={16} className="animate-spin text-[#8b949e]" />
+            </div>
+          )}
+          {commentsLoaded && comments.length === 0 && (
+            <p className="text-xs text-[#8b949e] text-center py-1">
+              Aucun commentaire. Soyez le premier !
+            </p>
+          )}
           {commentsLoaded && comments.map((c) => {
             const cName = `${c.author?.firstName ?? ''} ${c.author?.lastName ?? ''}`.trim();
             return (
               <div key={c.id} className="flex items-start gap-2.5">
                 <Avatar name={cName} size="xs" />
-                <div className="flex-1 min-w-0 bg-slate-800 rounded-xl px-3 py-2">
+                <div className="flex-1 min-w-0 bg-[#161b22] border border-[#30363d]/80 rounded-md px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-white">{cName}</span>
+                    <span className="text-xs font-semibold text-[#e6edf3]">{cName}</span>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] text-slate-600">{timeAgo(c.createdAt)}</span>
+                      <span className="text-[10px] text-[#8b949e]">{timeAgo(c.createdAt)}</span>
                       {c.author?.id === currentUser?.id && (
-                        <button onClick={() => deleteComment(c.id)} className="text-slate-700 hover:text-red-400 transition-colors"><Trash2 size={11} /></button>
+                        <button
+                          onClick={() => deleteComment(c.id)}
+                          className="text-[#8b949e] hover:text-red-400 transition-colors"
+                        >
+                          <Trash2 size={11} />
+                        </button>
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">{c.content}</p>
+                  <p className="text-xs text-[#e6edf3] mt-0.5 leading-relaxed whitespace-pre-wrap">{c.content}</p>
                 </div>
               </div>
             );
           })}
           <form onSubmit={addComment} className="flex items-center gap-2 pt-1">
             <Avatar name={`${currentUser?.firstName} ${currentUser?.lastName}`} size="xs" />
-            <input value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Écrire un commentaire..."
-              className="flex-1 text-xs bg-slate-800 border border-white/8 text-white placeholder:text-slate-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-            <button type="submit" disabled={!newComment.trim() || sendingComment}
-              className="size-8 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 disabled:opacity-40 text-white rounded-xl transition-all shrink-0">
+            <input
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Écrire un commentaire..."
+              className="flex-1 text-xs bg-[#0f1117] border border-[#30363d] text-[#e6edf3] placeholder:text-[#6e7681] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={!newComment.trim() || sendingComment}
+              className="size-8 flex items-center justify-center bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors shrink-0"
+              aria-label="Envoyer le commentaire"
+            >
               {sendingComment ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
             </button>
           </form>
         </div>
       )}
-    </div>
+    </article>
   );
 }
 
@@ -435,24 +490,33 @@ function QuartierBanner({ quartier, isAdmin, onBannerChange }) {
   };
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: 280 }}>
-      {quartier.bannerUrl
-        ? <img src={quartier.bannerUrl} alt="" className="w-full h-full object-cover" />
-        : <div className="w-full h-full bg-gradient-to-br from-indigo-600/40 via-violet-600/30 to-slate-900" />
-      }
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+    <div className="relative w-full rounded-xl overflow-hidden border border-[#30363d] h-44 lg:h-56 bg-gradient-to-br from-emerald-900/40 via-[#161b22] to-[#0f1117]">
+      {quartier.bannerUrl && (
+        <img src={quartier.bannerUrl} alt="" className="w-full h-full object-cover" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0f1117] via-[#0f1117]/40 to-transparent" />
       <div className="absolute bottom-0 left-0 p-5">
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-1">Fil d'actualité</p>
-        <h2 className="text-2xl font-bold text-white tracking-tight">{quartier.nom ?? quartier.name}</h2>
-        {(quartier.adresse ?? quartier.address) && <p className="text-sm text-slate-400 mt-0.5">{quartier.adresse ?? quartier.address}</p>}
+        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-semibold uppercase tracking-wider mb-2">
+          <span className="size-1.5 bg-emerald-400 rounded-full ql-pulse-dot" />
+          Quartier actif
+        </div>
+        <h2 className="text-xl lg:text-2xl font-bold text-white tracking-tight">{quartier.nom ?? quartier.name}</h2>
+        {(quartier.adresse ?? quartier.address) && (
+          <p className="text-sm text-[#e6edf3]/80 mt-0.5 flex items-center gap-1.5">
+            <MapPin size={12} /> {quartier.adresse ?? quartier.address}
+          </p>
+        )}
       </div>
       {isAdmin && (
         <div className="absolute top-4 right-4">
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          <button onClick={() => fileRef.current?.click()} disabled={uploading}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-semibold bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white rounded-xl border border-white/20 transition-colors disabled:opacity-60">
-            {uploading ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
-            {uploading ? 'Envoi...' : 'Changer la bannière'}
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white rounded-md border border-white/20 transition-colors disabled:opacity-60"
+          >
+            {uploading ? <Loader2 size={12} className="animate-spin" /> : <ImagePlus size={12} />}
+            {uploading ? 'Envoi...' : 'Bannière'}
           </button>
         </div>
       )}
@@ -470,8 +534,11 @@ export default function Dashboard() {
   const [quartierId, setQuartierId] = useState('');
   const [loading, setLoading]       = useState(true);
   const [posting, setPosting]       = useState(false);
-  const [hasQuartier, setHasQuartier] = useState(null); // null = loading
+  const [hasQuartier, setHasQuartier] = useState(null);
   const [userAddress, setUserAddress] = useState(null);
+  const [leavingId, setLeavingId] = useState(null);
+  const [confirmLeaveId, setConfirmLeaveId] = useState(null);
+  const [composeOpen, setComposeOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -482,7 +549,6 @@ export default function Dashboard() {
         setUserAddress(addr);
 
         if (ids.length === 0) {
-          // No quartier yet → show browser
           setHasQuartier(false);
           return;
         }
@@ -508,19 +574,21 @@ export default function Dashboard() {
       const res = await api.post('/posts', { content: content.trim(), quartierId: Number(quartierId) });
       setPosts([res.data, ...posts]);
       setContent('');
+      setComposeOpen(false);
     } catch { /* ignore */ } finally { setPosting(false); }
   };
 
   const deletePost = async (id) => {
-    try { await api.delete(`/posts/${id}`); setPosts((p) => p.filter((x) => x.id !== id)); } catch { /* ignore */ }
+    try {
+      await api.delete(`/posts/${id}`);
+      setPosts((p) => p.filter((x) => x.id !== id));
+    } catch { /* ignore */ }
   };
 
   const isVerified = user?.isVerified || user?.role === 'super_admin';
 
   const adminQuartier = quartiers.find((q) => q.adminId === user?.id);
   const bannerQuartier = adminQuartier ?? quartiers[0] ?? null;
-  const [leavingId, setLeavingId] = useState(null);
-  const [confirmLeaveId, setConfirmLeaveId] = useState(null);
 
   const leaveQuartier = async (id) => {
     setLeavingId(id);
@@ -530,23 +598,36 @@ export default function Dashboard() {
       setQuartiers(remaining);
       if (remaining.length === 0) setHasQuartier(false);
       else if (quartierId === String(id)) setQuartierId(String(remaining[0].id));
-    } catch { /* ignore */ } finally { setLeavingId(null); setConfirmLeaveId(null); }
+    } catch { /* ignore */ } finally {
+      setLeavingId(null);
+      setConfirmLeaveId(null);
+    }
   };
 
   const handleBannerChange = (bannerUrl) => {
-    setQuartiers((prev) => prev.map((q) => q.id === bannerQuartier.id ? { ...q, bannerUrl } : q));
+    setQuartiers((prev) =>
+      prev.map((q) => q.id === bannerQuartier.id ? { ...q, bannerUrl } : q)
+    );
   };
 
-  // Full-page skeleton while we determine which view to show
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="w-full rounded-2xl bg-slate-900 border border-white/8 animate-pulse" style={{ height: 280 }} />
-        <div className="space-y-4">
+      <div className="space-y-5">
+        <div className="w-full rounded-xl bg-[#161b22] border border-[#30363d] animate-pulse h-44" />
+        <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-slate-900 rounded-2xl border border-white/8 p-5 animate-pulse">
-              <div className="flex gap-3"><div className="size-10 bg-slate-800 rounded-full" /><div className="flex-1 space-y-2"><div className="h-3 bg-slate-800 rounded w-32" /><div className="h-2 bg-slate-800/60 rounded w-20" /></div></div>
-              <div className="mt-4 space-y-2"><div className="h-3 bg-slate-800/60 rounded" /><div className="h-3 bg-slate-800/60 rounded w-3/4" /></div>
+            <div key={i} className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 animate-pulse">
+              <div className="flex gap-3">
+                <div className="size-10 bg-[#21262d] rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-[#21262d] rounded w-32" />
+                  <div className="h-2 bg-[#21262d] rounded w-20" />
+                </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="h-3 bg-[#21262d] rounded" />
+                <div className="h-3 bg-[#21262d] rounded w-3/4" />
+              </div>
             </div>
           ))}
         </div>
@@ -554,12 +635,24 @@ export default function Dashboard() {
     );
   }
 
-  // No quartier yet → show quartier browser
   if (!hasQuartier) return <QuartierBrowser userAddress={userAddress} />;
 
-  // Has quartier → show feed
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      <div className="hidden lg:flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-[#e6edf3] tracking-tight">Fil d'actualité</h1>
+          <p className="text-sm text-[#8b949e] mt-0.5">
+            {bannerQuartier?.nom ?? bannerQuartier?.name ?? 'Votre quartier'}
+          </p>
+        </div>
+        {isVerified && (
+          <Button onClick={() => setComposeOpen(true)} size="md">
+            <Plus size={14} /> Publier
+          </Button>
+        )}
+      </div>
+
       {bannerQuartier && (
         <QuartierBanner
           quartier={bannerQuartier}
@@ -568,114 +661,173 @@ export default function Dashboard() {
         />
       )}
 
-      {!isVerified && (
-        <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-          <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-amber-300">Compte en attente de vérification</p>
-            <p className="text-xs text-amber-500 mt-0.5">
-              Envoyez votre justificatif pour accéder aux publications.{' '}
-              <Link to="/upload-proof" className="font-semibold underline">Envoyer maintenant →</Link>
-            </p>
-          </div>
+      {quartiers.length > 1 && (
+        <div className="lg:hidden flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          {quartiers.map((q) => {
+            const isAdmin = q.adminId === user?.id;
+            const active = quartierId === String(q.id);
+            return (
+              <button
+                key={q.id}
+                onClick={() => setQuartierId(String(q.id))}
+                className={[
+                  'flex items-center gap-2 shrink-0 px-3 py-2 rounded-md border text-xs font-medium transition-colors',
+                  active
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                    : 'bg-[#161b22] border-[#30363d] text-[#8b949e] hover:text-[#e6edf3]',
+                ].join(' ')}
+              >
+                <span className="size-5 rounded bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-[10px] font-bold">
+                  {(q.nom ?? q.name)?.[0]?.toUpperCase()}
+                </span>
+                <span className="truncate max-w-[6rem]">{q.nom ?? q.name}</span>
+                {isAdmin && <ShieldCheck size={11} className="text-emerald-400" />}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
-          {isVerified && (
-            <div className="bg-slate-900 rounded-2xl border border-white/8 p-5">
-              <div className="flex items-start gap-3">
-                <Avatar name={`${user?.firstName} ${user?.lastName}`} size="md" />
-                <div className="flex-1 space-y-3">
-                  <textarea
-                    value={content} onChange={(e) => setContent(e.target.value)}
-                    placeholder="Partagez une actualité avec vos voisins..."
-                    rows={3}
-                    className="w-full resize-none text-sm text-white placeholder:text-slate-600 bg-slate-800 rounded-xl border border-white/8 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  />
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="relative">
-                      <select value={quartierId} onChange={(e) => setQuartierId(e.target.value)}
-                        className="appearance-none pl-3 pr-7 py-1.5 text-xs font-medium bg-slate-800 border border-white/8 text-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-colors">
-                        {quartiers.map((q) => <option key={q.id} value={String(q.id)}>{q.nom ?? q.name}</option>)}
-                      </select>
-                      <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
-                    </div>
-                    <Button size="sm" onClick={submitPost} loading={posting} disabled={!content.trim()}>
-                      <Send size={14} /> Publier
-                    </Button>
-                  </div>
-                </div>
+      <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-6 lg:items-start">
+        <div className="space-y-4">
+          {!isVerified && (
+            <div className="flex items-start gap-3 p-4 bg-amber-500/5 border border-amber-500/30 rounded-lg">
+              <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-amber-300">Vérification en attente</p>
+                <p className="text-xs text-[#8b949e] mt-1">
+                  <Link to="/upload-proof" className="text-emerald-400 hover:text-emerald-300 font-medium">
+                    Envoyer un justificatif →
+                  </Link>
+                </p>
               </div>
             </div>
           )}
 
-          {posts.length === 0 ? (
-            <div className="bg-slate-900 rounded-2xl border border-white/8 p-12 text-center">
-              <p className="text-slate-600 text-sm">Aucune publication pour le moment.</p>
-              <p className="text-slate-700 text-xs mt-1">Soyez le premier à partager une actualité !</p>
-            </div>
-          ) : (
-            posts.map((p) => <PostCard key={p.id} post={p} currentUser={user} onDelete={deletePost} />)
-          )}
-        </div>
-
-        <div>
-          <div className="bg-slate-900 rounded-2xl border border-white/8 p-5">
-            <h2 className="text-sm font-semibold text-white mb-4">Mon quartier</h2>
-            <div className="space-y-2">
-              {quartiers.map((q) => {
-                const isAdmin = q.adminId === user?.id;
-                const isConfirming = confirmLeaveId === q.id;
-                return (
-                  <div key={q.id} className="rounded-xl overflow-hidden">
-                    <Link to={`/neighborhoods/${q.id}`} className="flex items-center gap-3 p-2.5 hover:bg-white/5 transition-colors">
-                      <div className="size-9 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm shadow-indigo-500/20">
-                        <span className="text-white font-bold text-sm">{(q.nom ?? q.name)?.[0]?.toUpperCase()}</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-white truncate">{q.nom ?? q.name}</p>
-                        <p className="text-xs text-slate-600 truncate">{q.adresse ?? q.address}</p>
-                      </div>
-                    </Link>
-
-                    {/* Leave button — hidden for admin (creator can't leave) */}
-                    {!isAdmin && (
-                      isConfirming ? (
-                        <div className="flex items-center gap-2 px-2.5 pb-2.5">
-                          <p className="text-xs text-slate-400 flex-1">Quitter ce quartier ?</p>
-                          <button
-                            onClick={() => setConfirmLeaveId(null)}
-                            className="text-xs text-slate-500 hover:text-white px-2 py-1 rounded-lg transition-colors"
-                          >
-                            Annuler
-                          </button>
-                          <button
-                            onClick={() => leaveQuartier(q.id)}
-                            disabled={leavingId === q.id}
-                            className="flex items-center gap-1 text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            {leavingId === q.id ? <Loader2 size={11} className="animate-spin" /> : <LogOut size={11} />}
-                            Quitter
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setConfirmLeaveId(q.id)}
-                          className="w-full flex items-center gap-1.5 px-2.5 pb-2 text-xs text-slate-600 hover:text-red-400 transition-colors"
-                        >
-                          <LogOut size={11} /> Quitter le quartier
-                        </button>
-                      )
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+          <div className="space-y-3">
+            {posts.length === 0 ? (
+              <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-12 text-center">
+                <MessageCircle size={28} className="text-[#6e7681] mx-auto mb-3" />
+                <p className="text-sm font-medium text-[#e6edf3]">Aucune publication</p>
+                <p className="text-xs text-[#8b949e] mt-1">
+                  {isVerified
+                    ? 'Soyez le premier à partager quelque chose !'
+                    : 'Vérifiez votre compte pour publier.'}
+                </p>
+              </div>
+            ) : (
+              posts.map((p) => (
+                <PostCard key={p.id} post={p} currentUser={user} onDelete={deletePost} />
+              ))
+            )}
           </div>
         </div>
+
+        {quartiers.length > 0 && (
+          <aside className="hidden lg:block space-y-3 sticky top-20">
+            <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8b949e] mb-3">
+                Mes quartiers
+              </h2>
+              <div className="space-y-1.5">
+                {quartiers.map((q) => {
+                  const isAdmin = q.adminId === user?.id;
+                  const isActive = quartierId === String(q.id);
+                  const isConfirming = confirmLeaveId === q.id;
+                  return (
+                    <div key={q.id} className="rounded-md overflow-hidden">
+                      <button
+                        onClick={() => setQuartierId(String(q.id))}
+                        className={[
+                          'w-full flex items-center gap-2.5 p-2 text-left transition-colors rounded-md',
+                          isActive
+                            ? 'bg-emerald-500/10 border border-emerald-500/30'
+                            : 'hover:bg-[#21262d] border border-transparent',
+                        ].join(' ')}
+                      >
+                        <div className={[
+                          'size-9 rounded-md flex items-center justify-center font-bold text-sm shrink-0',
+                          isActive
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                            : 'bg-[#21262d] text-[#e6edf3] border border-[#30363d]',
+                        ].join(' ')}>
+                          {(q.nom ?? q.name)?.[0]?.toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-[#e6edf3] truncate">{q.nom ?? q.name}</p>
+                          <p className="text-xs text-[#8b949e] truncate">{q.adresse ?? q.address}</p>
+                          {isAdmin && (
+                            <span className="text-[10px] text-emerald-400 font-medium">Administrateur</span>
+                          )}
+                        </div>
+                      </button>
+                      <div className="flex items-center justify-between px-2 mt-0.5">
+                        <Link
+                          to={`/neighborhoods/${q.id}`}
+                          className="text-[10px] text-[#8b949e] hover:text-emerald-400 font-medium transition-colors"
+                        >
+                          Détails →
+                        </Link>
+                        {!isAdmin && (
+                          isConfirming ? (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => setConfirmLeaveId(null)}
+                                className="text-[10px] text-[#8b949e] hover:text-[#e6edf3]"
+                              >
+                                Annuler
+                              </button>
+                              <button
+                                onClick={() => leaveQuartier(q.id)}
+                                disabled={leavingId === q.id}
+                                className="flex items-center gap-1 text-[10px] font-semibold text-red-400 hover:text-red-300 disabled:opacity-50"
+                              >
+                                {leavingId === q.id ? <Loader2 size={10} className="animate-spin" /> : <LogOut size={10} />}
+                                Quitter
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmLeaveId(q.id)}
+                              className="flex items-center gap-1 text-[10px] text-[#8b949e] hover:text-red-400 transition-colors"
+                            >
+                              <LogOut size={10} /> Quitter
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+        )}
       </div>
+
+      {/* FAB mobile */}
+      {isVerified && (
+        <button
+          onClick={() => setComposeOpen(true)}
+          className="lg:hidden fixed bottom-20 right-5 z-40 size-12 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full shadow-lg shadow-emerald-900/50 flex items-center justify-center transition-colors"
+          aria-label="Publier"
+        >
+          <Plus size={22} strokeWidth={2.25} />
+        </button>
+      )}
+
+      <ComposeSheet
+        open={composeOpen}
+        onClose={() => setComposeOpen(false)}
+        user={user}
+        content={content}
+        onChange={setContent}
+        onSubmit={submitPost}
+        posting={posting}
+        quartiers={quartiers}
+        quartierId={quartierId}
+        onQuartierChange={setQuartierId}
+      />
     </div>
   );
 }

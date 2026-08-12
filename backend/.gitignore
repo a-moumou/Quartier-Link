@@ -23,3 +23,8 @@
 
 # macOS
 .DS_Store
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###

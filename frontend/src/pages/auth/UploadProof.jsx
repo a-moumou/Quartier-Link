@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, CheckCircle, X, Info } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import Logo from '../../components/ui/Logo';
 import api from '../../services/api';
 
 export default function UploadProof() {
@@ -32,7 +33,11 @@ export default function UploadProof() {
     }
   };
 
-  const onDrop = (e) => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files[0]); };
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    handleFile(e.dataTransfer.files[0]);
+  };
 
   const submit = async () => {
     if (!file) return;
@@ -52,13 +57,13 @@ export default function UploadProof() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="size-24 bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 rounded-3xl flex items-center justify-center mx-auto mb-8">
-            <CheckCircle size={44} className="text-indigo-400" />
+      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center p-4">
+        <div className="text-center max-w-md ql-fade-up">
+          <div className="size-16 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center mx-auto mb-6">
+            <CheckCircle size={32} className="text-emerald-400" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-3">Justificatif envoyé !</h1>
-          <p className="text-slate-400 mb-10 max-w-sm mx-auto leading-relaxed">
+          <h1 className="text-2xl font-semibold text-[#e6edf3] mb-2">Justificatif envoyé</h1>
+          <p className="text-sm text-[#8b949e] mb-8 max-w-sm mx-auto leading-relaxed">
             Votre document a bien été reçu. Un administrateur vérifiera votre identité sous 24–48h.
           </p>
           <Button onClick={() => navigate('/dashboard')} size="lg">
@@ -70,79 +75,99 @@ export default function UploadProof() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[400px] bg-indigo-600/12 rounded-full blur-[100px]" />
-      </div>
-
-      <div className="relative w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="size-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 mx-auto mb-5">
-            <Upload size={24} className="text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Vérification d'identité</h1>
-          <p className="mt-2 text-sm text-slate-400 max-w-xs mx-auto">Envoyez un justificatif de domicile pour rejoindre votre quartier.</p>
+    <div className="min-h-screen bg-[#0f1117] flex items-center justify-center p-4">
+      <div className="w-full max-w-md ql-fade-up">
+        <div className="flex justify-center mb-8">
+          <Logo to="/dashboard" size="md" />
         </div>
 
-        <div className="bg-slate-900 border border-white/8 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-7 shadow-xl shadow-black/30">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-semibold text-[#e6edf3]">Vérification d'identité</h1>
+            <p className="mt-1 text-sm text-[#8b949e]">
+              Envoyez un justificatif de domicile pour rejoindre votre quartier.
+            </p>
+          </div>
+
           {error && (
-            <div className="mb-5 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400">{error}</div>
+            <div className="mb-5 px-3.5 py-2.5 bg-red-500/10 border border-red-500/30 rounded-md text-sm text-red-400">
+              {error}
+            </div>
           )}
 
-          {/* Drop zone */}
           <div
             onClick={() => inputRef.current?.click()}
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={onDrop}
             className={[
-              'border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-200',
-              dragging ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/10 hover:border-white/20 hover:bg-white/3',
+              'border-2 border-dashed rounded-lg p-7 text-center cursor-pointer transition-colors',
+              dragging
+                ? 'border-emerald-500 bg-emerald-500/5'
+                : 'border-[#30363d] hover:border-emerald-500/50 hover:bg-[#0f1117]',
             ].join(' ')}
           >
-            <input ref={inputRef} type="file" className="hidden" accept=".jpg,.jpeg,.png,.pdf" onChange={(e) => handleFile(e.target.files[0])} />
+            <input
+              ref={inputRef}
+              type="file"
+              className="hidden"
+              accept=".jpg,.jpeg,.png,.pdf"
+              onChange={(e) => handleFile(e.target.files[0])}
+            />
+
             {file ? (
               <div className="space-y-3">
                 {preview ? (
-                  <img src={preview} alt="preview" className="h-32 mx-auto rounded-xl object-contain" />
+                  <img
+                    src={preview}
+                    alt="aperçu"
+                    className="h-32 mx-auto rounded-md object-contain border border-[#30363d]"
+                  />
                 ) : (
-                  <div className="size-14 bg-slate-800 rounded-xl flex items-center justify-center mx-auto">
-                    <FileText size={28} className="text-slate-500" />
+                  <div className="size-12 bg-[#0f1117] border border-[#30363d] rounded-md flex items-center justify-center mx-auto">
+                    <FileText size={22} className="text-[#8b949e]" />
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-medium text-white">{file.name}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{(file.size / 1024 / 1024).toFixed(2)} Mo</p>
+                  <p className="text-sm font-medium text-[#e6edf3]">{file.name}</p>
+                  <p className="text-xs text-[#8b949e] mt-0.5">{(file.size / 1024 / 1024).toFixed(2)} Mo</p>
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); setFile(null); setPreview(null); }}
-                  className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-red-400 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs text-[#8b949e] hover:text-red-400 transition-colors"
                 >
                   <X size={12} /> Supprimer
                 </button>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="size-14 bg-white/5 rounded-xl flex items-center justify-center mx-auto">
-                  <Upload size={24} className="text-slate-500" />
+                <div className="size-12 bg-[#0f1117] border border-[#30363d] rounded-md flex items-center justify-center mx-auto">
+                  <Upload size={20} className="text-[#8b949e]" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-300">Glissez votre fichier ici</p>
-                  <p className="text-xs text-slate-600 mt-1">ou cliquez pour sélectionner</p>
+                  <p className="text-sm font-medium text-[#e6edf3]">Glissez votre fichier ici</p>
+                  <p className="text-xs text-[#8b949e] mt-1">ou cliquez pour sélectionner</p>
                 </div>
-                <p className="text-xs text-slate-600">JPG, PNG, PDF — max {MAX_MB} Mo</p>
+                <p className="text-xs text-[#6e7681]">JPG, PNG, PDF — max {MAX_MB} Mo</p>
               </div>
             )}
           </div>
 
-          <div className="mt-4 flex items-start gap-3 p-4 bg-indigo-500/8 border border-indigo-500/15 rounded-xl">
-            <Info size={15} className="text-indigo-400 mt-0.5 shrink-0" />
-            <p className="text-xs text-indigo-300 leading-relaxed">
+          <div className="mt-4 flex items-start gap-2.5 p-3.5 bg-emerald-500/5 border border-emerald-500/25 rounded-md">
+            <Info size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+            <p className="text-xs text-emerald-300/90 leading-relaxed">
               Facture EDF/eau, quittance de loyer ou avis d'imposition à votre adresse actuelle.
             </p>
           </div>
 
-          <Button onClick={submit} loading={loading} disabled={!file} fullWidth size="lg" className="mt-5">
+          <Button
+            onClick={submit}
+            loading={loading}
+            disabled={!file}
+            fullWidth
+            size="lg"
+            className="mt-5"
+          >
             Envoyer le justificatif
           </Button>
         </div>

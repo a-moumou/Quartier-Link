@@ -1,0 +1,159 @@
+{
+  "info": {
+    "_postman_id": "ql-api-collection-2025",
+    "name": "QuartierLink API",
+    "description": "Collection de tests API pour le projet QuartierLink - Symfony 7 Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /api/register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@test.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/register", "host": ["{{base_url}}"], "path": ["api", "register"]}
+          }
+        },
+        {
+          "name": "POST /api/login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@test.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/login", "host": ["{{base_url}}"], "path": ["api", "login"]}
+          }
+        },
+        {
+          "name": "GET /api/me",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {"raw": "{{base_url}}/api/me", "host": ["{{base_url}}"], "path": ["api", "me"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quartiers",
+      "item": [
+        {
+          "name": "GET /api/quartiers",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {"raw": "{{base_url}}/api/quartiers", "host": ["{{base_url}}"], "path": ["api", "quartiers"]}
+          }
+        },
+        {
+          "name": "POST /api/quartiers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Quartier des Arts\",\n  \"description\": \"Un quartier culturel et dynamique\",\n  \"adresse\": \"10 Rue des Arts, Paris\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/quartiers", "host": ["{{base_url}}"], "path": ["api", "quartiers"]}
+          }
+        },
+        {
+          "name": "GET /api/quartiers/{id}",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {"raw": "{{base_url}}/api/quartiers/1", "host": ["{{base_url}}"], "path": ["api", "quartiers", "1"]}
+          }
+        },
+        {
+          "name": "PATCH /api/quartiers/{id}/verify (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{admin_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIF\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/quartiers/1/verify", "host": ["{{base_url}}"], "path": ["api", "quartiers", "1", "verify"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "GET /api/quartiers/{id}/posts",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {"raw": "{{base_url}}/api/quartiers/1/posts", "host": ["{{base_url}}"], "path": ["api", "quartiers", "1", "posts"]}
+          }
+        },
+        {
+          "name": "POST /api/quartiers/{id}/posts",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contenu\": \"Événement communautaire ce samedi au parc!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/quartiers/1/posts", "host": ["{{base_url}}"], "path": ["api", "quartiers", "1", "posts"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "item": [
+        {
+          "name": "GET /api/admin/users",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/admin/users", "host": ["{{base_url}}"], "path": ["api", "admin", "users"]}
+          }
+        },
+        {
+          "name": "PATCH /api/admin/users/{id}/verify",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{admin_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statutVerification\": \"VERIFIE\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/admin/users/1/verify", "host": ["{{base_url}}"], "path": ["api", "admin", "users", "1", "verify"]}
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8000"},
+    {"key": "jwt_token", "value": ""},
+    {"key": "admin_token", "value": ""}
+  ]
+}

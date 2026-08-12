@@ -3,6 +3,7 @@ import { Bell, MessageSquare, LogOut, User, Menu, X, ChevronDown } from 'lucide-
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../ui/Avatar';
+import Logo from '../ui/Logo';
 
 export default function Navbar({ onMenuToggle, menuOpen }) {
   const { user, logout } = useAuth();
@@ -19,56 +20,67 @@ export default function Navbar({ onMenuToggle, menuOpen }) {
   const handleLogout = () => { logout(); navigate('/'); };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-slate-950/95 backdrop-blur-md border-b border-white/5 flex items-center lg:pl-64">
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-[#0f1117]/90 backdrop-blur-md border-b border-[#30363d]/80 flex items-center lg:pl-64">
       <div className="flex items-center justify-between w-full px-4 sm:px-6">
-        {/* Left */}
         <div className="flex items-center gap-3">
           {user && (
-            <button onClick={onMenuToggle} className="lg:hidden p-2 rounded-xl hover:bg-white/8 text-slate-500 transition-colors">
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            <button
+              onClick={onMenuToggle}
+              className="lg:hidden p-2 rounded-md hover:bg-[#21262d] text-[#8b949e] transition-colors"
+              aria-label="Menu"
+            >
+              {menuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           )}
-          {!user && (
-            <Link to="/" className="flex items-center gap-2.5">
-              <div className="size-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-500/30">
-                <span className="text-white font-bold text-sm">Q</span>
-              </div>
-              <span className="font-bold text-white text-lg tracking-tight">QuartierLink</span>
-            </Link>
-          )}
+          {!user && <Logo to="/" size="sm" />}
         </div>
 
-        {/* Right */}
         {user ? (
           <div className="flex items-center gap-1">
-            <Link to="/messages" className="p-2 rounded-xl hover:bg-white/8 text-slate-500 hover:text-indigo-400 transition-colors">
-              <MessageSquare size={19} />
+            <Link
+              to="/messages"
+              className="p-2 rounded-md hover:bg-[#21262d] text-[#8b949e] hover:text-[#e6edf3] transition-colors"
+            >
+              <MessageSquare size={18} />
             </Link>
-            <button className="relative p-2 rounded-xl hover:bg-white/8 text-slate-500 hover:text-indigo-400 transition-colors">
-              <Bell size={19} />
-              <span className="absolute top-2 right-2 size-1.5 bg-red-500 rounded-full" />
+            <button
+              className="relative p-2 rounded-md hover:bg-[#21262d] text-[#8b949e] hover:text-[#e6edf3] transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell size={18} />
+              <span className="absolute top-1.5 right-1.5 size-1.5 bg-emerald-500 rounded-full" />
             </button>
 
             <div className="relative ml-1" ref={dropRef}>
-              <button onClick={() => setDropOpen(!dropOpen)} className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-xl hover:bg-white/8 transition-colors">
-                <Avatar name={`${user.firstName} ${user.lastName}`} size="sm" />
-                <span className="text-sm font-medium text-slate-300 hidden sm:block">{user.firstName}</span>
-                <ChevronDown size={14} className="text-slate-600 hidden sm:block" />
+              <button
+                onClick={() => setDropOpen(!dropOpen)}
+                className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-md hover:bg-[#21262d] transition-colors"
+              >
+                <Avatar name={`${user.firstName ?? ''} ${user.lastName ?? ''}`} size="sm" />
+                <span className="text-sm font-medium text-[#e6edf3] hidden sm:block">{user.firstName}</span>
+                <ChevronDown size={14} className="text-[#8b949e] hidden sm:block" />
               </button>
 
               {dropOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-slate-900 rounded-2xl shadow-2xl border border-white/8 py-2 z-50">
-                  <div className="px-4 py-2.5 mb-1">
-                    <p className="text-sm font-semibold text-white">{user.firstName} {user.lastName}</p>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>
+                <div className="absolute right-0 top-full mt-2 w-56 bg-[#161b22] border border-[#30363d] rounded-md shadow-xl shadow-black/40 py-1 z-50">
+                  <div className="px-3 py-2 border-b border-[#30363d]">
+                    <p className="text-sm font-semibold text-[#e6edf3] truncate">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="text-xs text-[#8b949e] truncate mt-0.5">{user.email}</p>
                   </div>
-                  <div className="h-px bg-white/5 mx-2 mb-1" />
-                  <Link to="/profile" onClick={() => setDropOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-indigo-400 transition-colors">
-                    <User size={15} /> Mon profil
+                  <Link
+                    to="/profile"
+                    onClick={() => setDropOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-[#e6edf3] hover:bg-[#21262d] transition-colors"
+                  >
+                    <User size={14} /> Mon profil
                   </Link>
-                  <div className="h-px bg-white/5 mx-2 my-1" />
-                  <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
-                    <LogOut size={15} /> Se déconnecter
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut size={14} /> Se déconnecter
                   </button>
                 </div>
               )}
@@ -76,8 +88,16 @@ export default function Navbar({ onMenuToggle, menuOpen }) {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <Link to="/login" className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">Connexion</Link>
-            <Link to="/register" className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white rounded-xl transition-all shadow-sm shadow-indigo-500/30">
+            <Link
+              to="/login"
+              className="px-3 py-1.5 text-sm font-medium text-[#8b949e] hover:text-[#e6edf3] transition-colors"
+            >
+              Connexion
+            </Link>
+            <Link
+              to="/register"
+              className="px-3 py-1.5 text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-white rounded-md transition-colors"
+            >
               S'inscrire
             </Link>
           </div>

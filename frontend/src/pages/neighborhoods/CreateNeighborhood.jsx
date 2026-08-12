@@ -64,35 +64,57 @@ export default function CreateNeighborhood() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <Link to="/" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-400 transition-colors">
-        <ArrowLeft size={16} /> Retour
+    <div className="space-y-5 max-w-2xl">
+      <Link
+        to="/dashboard"
+        className="inline-flex items-center gap-1.5 text-sm text-[#8b949e] hover:text-emerald-400 transition-colors"
+      >
+        <ArrowLeft size={14} /> Retour
       </Link>
 
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Créer un quartier</h1>
-        <p className="text-sm text-slate-500 mt-1">Fondez une nouvelle communauté de voisinage</p>
+        <h1 className="text-xl font-semibold text-[#e6edf3] tracking-tight">Créer un quartier</h1>
+        <p className="text-sm text-[#8b949e] mt-1">
+          Fondez une nouvelle communauté de voisinage
+        </p>
       </div>
 
-      <div className="flex items-start gap-3 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-        <Info size={16} className="text-indigo-400 mt-0.5 shrink-0" />
-        <p className="text-sm text-indigo-300 leading-relaxed">
+      <div className="flex items-start gap-3 p-4 bg-emerald-500/5 border border-emerald-500/25 rounded-md">
+        <Info size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+        <p className="text-sm text-emerald-300/90 leading-relaxed">
           En créant ce quartier, vous en devenez l'administrateur. Il sera validé par un super-administrateur avant publication.
         </p>
       </div>
 
-      <div className="bg-slate-900 rounded-2xl border border-white/8 p-6">
+      <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-6">
         {error && (
-          <div className="mb-5 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400">{error}</div>
+          <div className="mb-5 px-3.5 py-2.5 bg-red-500/10 border border-red-500/30 rounded-md text-sm text-red-400">
+            {error}
+          </div>
         )}
-        <form onSubmit={submit} className="space-y-5">
-          <Input label="Nom du quartier" type="text" placeholder="ex. Montmartre Nord" value={form.nom} onChange={set('nom')} required />
+        <form onSubmit={submit} className="space-y-4">
+          <Input
+            label="Nom du quartier"
+            type="text"
+            placeholder="ex. Montmartre Nord"
+            value={form.nom}
+            onChange={set('nom')}
+            required
+          />
 
           <div className="flex flex-col gap-1.5">
-            <Input label="Adresse / Zone géographique" type="text" placeholder="ex. 18e arrondissement, Paris" icon={MapPin} value={form.adresse} onChange={set('adresse')} required />
+            <Input
+              label="Adresse / Zone géographique"
+              type="text"
+              placeholder="ex. 18e arrondissement, Paris"
+              icon={MapPin}
+              value={form.adresse}
+              onChange={set('adresse')}
+              required
+            />
             {locating && (
-              <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                <span className="inline-block size-1.5 rounded-full bg-slate-500 animate-pulse" />
+              <p className="text-xs text-[#8b949e] flex items-center gap-1.5">
+                <span className="inline-block size-1.5 rounded-full bg-[#8b949e] ql-pulse-dot" />
                 Géolocalisation en cours…
               </p>
             )}
@@ -104,17 +126,19 @@ export default function CreateNeighborhood() {
             )}
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-slate-300">Description</label>
-            <textarea
-              placeholder="Décrivez votre quartier, ses spécificités, son ambiance..."
-              value={form.description} onChange={set('description')} rows={4}
-              className="w-full rounded-xl text-sm text-white bg-slate-800 border border-white/8 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent hover:border-white/15 transition-all px-4 py-2.5 resize-none"
-            />
-          </div>
+          <Input
+            label="Description"
+            textarea
+            rows={4}
+            placeholder="Décrivez votre quartier, ses spécificités, son ambiance..."
+            value={form.description}
+            onChange={set('description')}
+          />
 
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <Link to="/"><Button variant="secondary" type="button">Annuler</Button></Link>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Link to="/dashboard">
+              <Button variant="secondary" type="button">Annuler</Button>
+            </Link>
             <Button type="submit" loading={loading}>Créer le quartier</Button>
           </div>
         </form>

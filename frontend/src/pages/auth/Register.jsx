@@ -1,30 +1,47 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, MapPin } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, MapPin, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/ui/Button';
+import Logo from '../../components/ui/Logo';
 
-const Field = ({ label, children }) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="text-sm font-medium text-slate-300">{label}</label>
-    {children}
-  </div>
-);
+function Field({ label, children }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-medium text-[#e6edf3]">{label}</label>
+      {children}
+    </div>
+  );
+}
 
-const DarkInput = ({ icon: Icon, ...props }) => (
-  <div className="relative">
-    {Icon && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"><Icon size={16} /></span>}
-    <input
-      className={['w-full py-3 bg-slate-800 border border-white/8 text-white placeholder:text-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all', Icon ? 'pl-10 pr-4' : 'px-4'].join(' ')}
-      {...props}
-    />
-  </div>
-);
+function StyledInput({ icon: Icon, className = '', ...props }) {
+  return (
+    <div className="relative">
+      {Icon && (
+        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#6e7681] pointer-events-none">
+          <Icon size={15} />
+        </span>
+      )}
+      <input
+        className={[
+          'w-full py-2.5 bg-[#0f1117] border border-[#30363d] text-[#e6edf3] placeholder:text-[#6e7681] rounded-md text-sm',
+          'focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500',
+          'hover:border-[#484f58] transition-colors',
+          Icon ? 'pl-9 pr-3' : 'px-3',
+          className,
+        ].join(' ')}
+        {...props}
+      />
+    </div>
+  );
+}
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', address: '', password: '', confirm: '' });
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', email: '', address: '', password: '', confirm: '',
+  });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -44,7 +61,13 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      await register({ firstName: form.firstName, lastName: form.lastName, email: form.email, address: form.address, password: form.password });
+      await register({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        address: form.address,
+        password: form.password,
+      });
       navigate('/login', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Une erreur est survenue.');
@@ -54,65 +77,90 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[500px] bg-violet-600/12 rounded-full blur-[120px]" />
-      </div>
-
-      <div className="relative w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2.5">
-            <div className="size-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <span className="text-white font-bold text-lg">Q</span>
-            </div>
-            <span className="font-bold text-white text-xl tracking-tight">QuartierLink</span>
-          </Link>
-          <h1 className="mt-7 text-3xl font-bold text-white tracking-tight">Créer un compte</h1>
-          <p className="mt-2 text-sm text-slate-400">Rejoignez votre communauté de quartier</p>
+    <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center p-4 py-10">
+      <div className="w-full max-w-md ql-fade-up">
+        <div className="flex justify-center mb-8">
+          <Logo to="/" size="md" />
         </div>
 
-        <div className="bg-slate-900 border border-white/8 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-7 shadow-xl shadow-black/30">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-semibold text-[#e6edf3]">Créer un compte</h1>
+            <p className="mt-1 text-sm text-[#8b949e]">Rejoignez votre réseau de voisinage</p>
+          </div>
+
           {error && (
-            <div className="mb-5 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400">{error}</div>
-          )}
-          <form onSubmit={submit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Prénom"><DarkInput icon={User} type="text" placeholder="Jean" value={form.firstName} onChange={set('firstName')} required /></Field>
-              <Field label="Nom"><DarkInput type="text" placeholder="Dupont" value={form.lastName} onChange={set('lastName')} required /></Field>
+            <div className="mb-5 px-3.5 py-2.5 bg-red-500/10 border border-red-500/30 rounded-md text-sm text-red-400">
+              {error}
             </div>
-            <Field label="Adresse e-mail"><DarkInput icon={Mail} type="email" placeholder="vous@exemple.fr" value={form.email} onChange={set('email')} required autoComplete="email" /></Field>
-            <Field label="Adresse postale"><DarkInput icon={MapPin} type="text" placeholder="12 rue de la Paix, Paris" value={form.address} onChange={set('address')} required /></Field>
+          )}
+
+          <form onSubmit={submit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Prénom">
+                <StyledInput icon={User} type="text" placeholder="Jean" value={form.firstName} onChange={set('firstName')} required />
+              </Field>
+              <Field label="Nom">
+                <StyledInput type="text" placeholder="Dupont" value={form.lastName} onChange={set('lastName')} required />
+              </Field>
+            </div>
+
+            <Field label="Adresse e-mail">
+              <StyledInput icon={Mail} type="email" placeholder="vous@exemple.fr" value={form.email} onChange={set('email')} required autoComplete="email" />
+            </Field>
+
+            <Field label="Adresse postale">
+              <StyledInput icon={MapPin} type="text" placeholder="12 rue de la Paix, Paris" value={form.address} onChange={set('address')} required />
+            </Field>
 
             <Field label="Mot de passe">
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"><Lock size={16} /></span>
-                <input type={showPw ? 'text' : 'password'} placeholder="8 caractères minimum" value={form.password} onChange={set('password')} required
-                  className="w-full pl-10 pr-10 py-3 bg-slate-800 border border-white/8 text-white placeholder:text-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#6e7681] pointer-events-none">
+                  <Lock size={15} />
+                </span>
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  placeholder="8 caractères minimum"
+                  value={form.password}
+                  onChange={set('password')}
+                  required
+                  className="w-full pl-9 pr-9 py-2.5 bg-[#0f1117] border border-[#30363d] text-[#e6edf3] placeholder:text-[#6e7681] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 hover:border-[#484f58] transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw(!showPw)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6e7681] hover:text-[#e6edf3] transition-colors"
+                >
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </Field>
 
-            <Field label="Confirmer le mot de passe">
-              <DarkInput icon={Lock} type={showPw ? 'text' : 'password'} placeholder="••••••••" value={form.confirm} onChange={set('confirm')} required />
+            <Field label="Confirmer">
+              <StyledInput
+                icon={Lock}
+                type={showPw ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={form.confirm}
+                onChange={set('confirm')}
+                required
+              />
             </Field>
 
             <Button type="submit" fullWidth loading={loading} size="lg" className="mt-2">
-              Créer mon compte
+              Créer mon compte <ArrowRight size={14} />
             </Button>
           </form>
-
-          <p className="text-xs text-slate-600 text-center mt-5">
-            En créant un compte, vous acceptez nos{' '}
-            <a href="#" className="text-indigo-400 hover:underline">CGU</a> et notre{' '}
-            <a href="#" className="text-indigo-400 hover:underline">politique de confidentialité</a>.
-          </p>
         </div>
 
-        <p className="text-center text-sm text-slate-500 mt-6">
-          Déjà un compte ?{' '}
-          <Link to="/login" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">Se connecter</Link>
+        <p className="text-center text-sm text-[#8b949e] mt-6">
+          Déjà inscrit ?{' '}
+          <Link
+            to="/login"
+            className="font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            Se connecter
+          </Link>
         </p>
       </div>
     </div>

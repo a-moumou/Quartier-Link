@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Search, MessageSquare, MapPin, Users, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '../components/ui/Avatar';
-import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import api from '../services/api';
 
@@ -23,10 +22,10 @@ export default function MembersPage() {
     .filter((m) => {
       const q = search.toLowerCase();
       const name = `${m.firstName ?? ''} ${m.lastName ?? ''}`.toLowerCase();
-      const quartierNames = (m.quartiers ?? []).map((qt) => qt.name?.toLowerCase() ?? '').join(' ');
+      const quartierNames = (m.quartiers ?? [])
+        .map((qt) => qt.name?.toLowerCase() ?? '').join(' ');
       return name.includes(q) || quartierNames.includes(q);
     })
-    // Admins en premier, puis alphabétique
     .sort((a, b) => {
       if (a.isAdmin && !b.isAdmin) return -1;
       if (!a.isAdmin && b.isAdmin) return 1;
@@ -34,102 +33,103 @@ export default function MembersPage() {
     });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Voisins</h1>
-        <p className="text-sm text-slate-500 mt-1">Membres de votre quartier</p>
+        <h1 className="text-xl font-semibold text-[#e6edf3] tracking-tight">Voisins</h1>
+        <p className="text-sm text-[#8b949e] mt-1">Membres de votre quartier</p>
       </div>
 
       <div className="relative">
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600" />
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6e7681]" />
         <input
           type="text"
           placeholder="Rechercher un voisin..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-800 border border-white/8 text-white placeholder:text-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent hover:border-white/15 transition-colors"
+          className="w-full pl-9 pr-3 py-2.5 text-sm bg-[#0f1117] border border-[#30363d] text-[#e6edf3] placeholder:text-[#6e7681] rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
         />
       </div>
 
       {loading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-slate-900 rounded-2xl border border-white/8 p-5 animate-pulse">
+            <div key={i} className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 animate-pulse">
               <div className="flex items-start gap-3">
-                <div className="size-10 rounded-full bg-slate-800 shrink-0" />
+                <div className="size-10 rounded-full bg-[#21262d] shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-3.5 bg-slate-800 rounded w-2/3" />
-                  <div className="h-2.5 bg-slate-800/60 rounded w-1/2" />
+                  <div className="h-3 bg-[#21262d] rounded w-2/3" />
+                  <div className="h-2 bg-[#21262d] rounded w-1/2" />
                 </div>
               </div>
             </div>
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div className="bg-slate-900 rounded-2xl border border-white/8 p-16 text-center">
-          <div className="size-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/8">
-            <Users size={24} className="text-slate-600" />
+        <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-12 text-center">
+          <div className="size-12 bg-[#21262d] border border-[#30363d] rounded-md flex items-center justify-center mx-auto mb-4">
+            <Users size={22} className="text-[#8b949e]" />
           </div>
-          <p className="text-slate-400 font-medium">Aucun voisin pour l'instant</p>
-          <p className="text-sm text-slate-600 mt-1">Rejoignez un quartier pour voir vos voisins.</p>
+          <p className="text-[#e6edf3] font-semibold">Aucun voisin pour l'instant</p>
+          <p className="text-sm text-[#8b949e] mt-1">Rejoignez un quartier pour voir vos voisins.</p>
         </div>
       ) : (
         <>
-          <p className="text-sm text-slate-500">
+          <p className="text-xs text-[#8b949e]">
             {filtered.length} voisin{filtered.length > 1 ? 's' : ''}
             {search && ` pour « ${search} »`}
           </p>
 
           {filtered.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-slate-500 font-medium">Aucun résultat</p>
+            <div className="text-center py-12 bg-[#161b22] border border-[#30363d] rounded-xl">
+              <p className="text-[#8b949e] font-medium">Aucun résultat</p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map((m) => {
                 const name = `${m.firstName ?? ''} ${m.lastName ?? ''}`.trim();
                 return (
-                  <div key={m.id} className={[
-                    'rounded-2xl p-5 flex flex-col gap-4 transition-colors',
-                    m.isAdmin
-                      ? 'bg-indigo-500/8 border border-indigo-500/30 hover:border-indigo-500/50'
-                      : 'bg-slate-900 border border-white/8 hover:border-indigo-500/30',
-                  ].join(' ')}>
+                  <div
+                    key={m.id}
+                    className={[
+                      'rounded-xl p-5 flex flex-col gap-4 transition-colors border',
+                      m.isAdmin
+                        ? 'bg-[#161b22] border-emerald-500/30 hover:border-emerald-500/50'
+                        : 'bg-[#161b22] border-[#30363d] hover:border-emerald-500/40',
+                    ].join(' ')}
+                  >
                     <div className="flex items-start gap-3">
                       <div className="relative shrink-0">
                         <Avatar name={name} size="md" />
                         {m.isAdmin && (
-                          <div className="absolute -bottom-1 -right-1 size-5 bg-indigo-500 rounded-full flex items-center justify-center shadow-sm shadow-indigo-500/40">
-                            <ShieldCheck size={11} className="text-white" />
+                          <div className="absolute -bottom-1 -right-1 size-5 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-[#161b22]">
+                            <ShieldCheck size={10} className="text-white" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-white text-sm">{name}</span>
-                        </div>
+                        <span className="font-semibold text-[#e6edf3] text-sm">{name}</span>
                         {m.isAdmin && (
-                          <p className="text-xs text-indigo-400 font-medium mt-0.5">
+                          <p className="text-xs text-emerald-400 font-medium mt-0.5">
                             Administrateur du quartier
                           </p>
                         )}
                         {m.quartiers?.length > 0 && (
                           <div className="flex items-center gap-1 mt-1 flex-wrap">
-                            <MapPin size={11} className="text-slate-500 shrink-0" />
+                            <MapPin size={11} className="text-[#8b949e] shrink-0" />
                             {m.quartiers.map((q) => (
-                              <span key={q.id} className="text-xs text-slate-500">{q.name}</span>
+                              <span key={q.id} className="text-xs text-[#8b949e]">{q.name}</span>
                             ))}
                           </div>
                         )}
                       </div>
                     </div>
                     <Button
-                      variant={m.isAdmin ? 'primary' : 'outline'}
+                      variant={m.isAdmin ? 'primary' : 'secondary'}
                       size="sm"
                       fullWidth
                       onClick={() => navigate('/messages', { state: { contactId: m.id } })}
                     >
-                      <MessageSquare size={14} /> Message
+                      <MessageSquare size={13} /> Envoyer un message
                     </Button>
                   </div>
                 );

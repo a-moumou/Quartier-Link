@@ -22,7 +22,7 @@ function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
         <div className="size-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );

@@ -1,6 +1,26 @@
-# Claude Code
+# Outils locaux
 .claude/
+.agents/
+.postman/
+skills-lock.json
 
 # macOS
 .DS_Store
 **/.DS_Store
+
+# Secrets et configuration locale
+docker-compose.yml
+docker-compose.override.yml
+backend/.env
+backend/.env.local
+backend/.env.test
+backend/config/jwt/*.pem
+frontend/.env
+frontend/.env.local
+frontend/.env.docker
+
+# Dependances et builds
+backend/vendor/
+backend/var/
+frontend/node_modules/
+frontend/dist/
