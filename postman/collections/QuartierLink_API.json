@@ -1,159 +1,2132 @@
 {
   "info": {
-    "_postman_id": "ql-api-collection-2025",
-    "name": "QuartierLink API",
-    "description": "Collection de tests API pour le projet QuartierLink - Symfony 7 Backend",
+    "name": "QuartierLink — API REST",
+    "description": "Collection generee depuis les controleurs Symfony.\n\n1. Renseigner la variable baseUrl.\n2. Lancer « POST /api/auth/login » : le jeton JWT est\n   enregistre automatiquement et applique aux autres appels.\n3. Les routes publiques sont marquees « noauth ».",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jeton}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "email",
+      "value": "postman@exemple.fr"
+    },
+    {
+      "key": "motDePasse",
+      "value": "MotDePasse123!"
+    },
+    {
+      "key": "jeton",
+      "value": ""
+    },
+    {
+      "key": "emailExecution",
+      "value": ""
+    }
+  ],
   "item": [
     {
       "name": "Auth",
       "item": [
         {
-          "name": "POST /api/register",
+          "name": "POST /api/auth/register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"le mot de passe n'est jamais renvoye\", () => {",
+                  "    pm.expect(pm.response.text().toLowerCase()).to.not.include('\"password\"');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "AuthController::register()",
+            "auth": {
+              "type": "noauth"
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@test.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\"\n}"
-            },
-            "url": {"raw": "{{base_url}}/api/register", "host": ["{{base_url}}"], "path": ["api", "register"]}
+              "raw": "{\n  \"firstName\": \"Ada\",\n  \"lastName\": \"Lovelace\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{motDePasse}}\"\n}"
+            }
           }
         },
         {
-          "name": "POST /api/login",
+          "name": "POST /api/auth/forgot-password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Reponse volontairement identique que l'adresse existe ou non,",
+                  "// pour ne pas reveler quels comptes sont enregistres.",
+                  "pm.test(\"statut attendu\", () => pm.expect(pm.response.code).to.be.oneOf([200, 202, 204]));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "AuthController::forgotPassword()",
+            "auth": {
+              "type": "noauth"
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@test.com\",\n  \"password\": \"Password123!\"\n}"
-            },
-            "url": {"raw": "{{base_url}}/api/login", "host": ["{{base_url}}"], "path": ["api", "login"]}
+              "raw": "{\n  \"email\": \"{{email}}\"\n}"
+            }
           }
         },
         {
-          "name": "GET /api/me",
+          "name": "POST /api/auth/reset-password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Le code de reinitialisation de la collection est factice :",
+                  "// l'API doit donc le refuser. Un 200 signifierait qu'un code",
+                  "// arbitraire est accepte, ce qui serait une faille.",
+                  "pm.test(\"un code invalide est refuse\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401, 404, 422]);",
+                  "});",
+                  "pm.test(\"reponse JSON\", () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "GET",
-            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
-            "url": {"raw": "{{base_url}}/api/me", "host": ["{{base_url}}"], "path": ["api", "me"]}
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "AuthController::resetPassword()",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"code\": \"123456\",\n  \"password\": \"{{motDePasse}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /api/auth/login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 et jeton present\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.token, 'token').to.be.a('string').and.not.empty;",
+                  "    pm.collectionVariables.set('jeton', j.token);",
+                  "});",
+                  "pm.test(\"reponse sous 2 s\", () => pm.expect(pm.response.responseTime).to.be.below(2000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "AuthController::login()",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{motDePasse}}\"\n}"
+            }
           }
         }
       ]
     },
     {
-      "name": "Quartiers",
+      "name": "User",
       "item": [
         {
-          "name": "GET /api/quartiers",
+          "name": "GET /api/user/me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
-            "url": {"raw": "{{base_url}}/api/quartiers", "host": ["{{base_url}}"], "path": ["api", "quartiers"]}
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "me"
+              ]
+            },
+            "description": "UserController::me()"
           }
         },
         {
-          "name": "POST /api/quartiers",
+          "name": "POST /api/user/upload-proof",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
-              {"key": "Content-Type", "value": "application/json"}
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/upload-proof",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "upload-proof"
+              ]
+            },
+            "description": "UserController::uploadProof()"
+          }
+        },
+        {
+          "name": "PUT /api/user/profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "profile"
+              ]
+            },
+            "description": "UserController::updateProfile()",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nom\": \"Quartier des Arts\",\n  \"description\": \"Un quartier culturel et dynamique\",\n  \"adresse\": \"10 Rue des Arts, Paris\"\n}"
+              "raw": "{\n  \"firstName\": \"Ada\",\n  \"lastName\": \"Lovelace\",\n  \"address\": \"12 rue de la Paix, Paris\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT /api/user/password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "password"
+              ]
             },
-            "url": {"raw": "{{base_url}}/api/quartiers", "host": ["{{base_url}}"], "path": ["api", "quartiers"]}
+            "description": "UserController::changePassword()",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{motDePasse}}\",\n  \"newPassword\": \"NouveauMotDePasse123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/user/account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "account"
+              ]
+            },
+            "description": "UserController::deleteAccount()"
+          }
+        },
+        {
+          "name": "GET /api/user/join-requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/join-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "join-requests"
+              ]
+            },
+            "description": "UserController::myJoinRequests()"
+          }
+        },
+        {
+          "name": "GET /api/user/members",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "members"
+              ]
+            },
+            "description": "UserController::members()"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quartier",
+      "item": [
+        {
+          "name": "GET /api/quartiers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Route publique : accessible sans jeton.",
+                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"reponse JSON\", () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartiers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartiers"
+              ]
+            },
+            "description": "QuartierController::list()",
+            "auth": {
+              "type": "noauth"
+            }
           }
         },
         {
           "name": "GET /api/quartiers/{id}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
-            "url": {"raw": "{{base_url}}/api/quartiers/1", "host": ["{{base_url}}"], "path": ["api", "quartiers", "1"]}
-          }
-        },
-        {
-          "name": "PATCH /api/quartiers/{id}/verify (Admin)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {"key": "Authorization", "value": "Bearer {{admin_token}}"},
-              {"key": "Content-Type", "value": "application/json"}
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"ACTIF\"\n}"
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartiers/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartiers",
+                "1"
+              ]
             },
-            "url": {"raw": "{{base_url}}/api/quartiers/1/verify", "host": ["{{base_url}}"], "path": ["api", "quartiers", "1", "verify"]}
-          }
-        }
-      ]
-    },
-    {
-      "name": "Posts",
-      "item": [
-        {
-          "name": "GET /api/quartiers/{id}/posts",
-          "request": {
-            "method": "GET",
-            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
-            "url": {"raw": "{{base_url}}/api/quartiers/1/posts", "host": ["{{base_url}}"], "path": ["api", "quartiers", "1", "posts"]}
+            "description": "QuartierController::show()"
           }
         },
         {
-          "name": "POST /api/quartiers/{id}/posts",
+          "name": "POST /api/quartiers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{jwt_token}}"},
-              {"key": "Content-Type", "value": "application/json"}
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartiers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartiers"
+              ]
+            },
+            "description": "QuartierController::create()",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"contenu\": \"Événement communautaire ce samedi au parc!\"\n}"
+              "raw": "{\n  \"name\": \"Quartier de test\",\n  \"description\": \"Cree par la collection Postman\",\n  \"address\": \"Paris\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/quartiers/{id}/leave",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartiers/1/leave",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartiers",
+                "1",
+                "leave"
+              ]
             },
-            "url": {"raw": "{{base_url}}/api/quartiers/1/posts", "host": ["{{base_url}}"], "path": ["api", "quartiers", "1", "posts"]}
+            "description": "QuartierController::leave()"
+          }
+        },
+        {
+          "name": "POST /api/quartiers/{id}/join",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartiers/1/join",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartiers",
+                "1",
+                "join"
+              ]
+            },
+            "description": "QuartierController::join()"
           }
         }
       ]
     },
     {
-      "name": "Users (Admin)",
+      "name": "Post",
       "item": [
         {
-          "name": "GET /api/admin/users",
+          "name": "GET /api/posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
-            "url": {"raw": "{{base_url}}/api/admin/users", "host": ["{{base_url}}"], "path": ["api", "admin", "users"]}
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ]
+            },
+            "description": "PostController::feed()"
           }
         },
         {
-          "name": "PATCH /api/admin/users/{id}/verify",
+          "name": "GET /api/posts/quartier/{id}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "PATCH",
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/quartier/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "quartier",
+                "1"
+              ]
+            },
+            "description": "PostController::byQuartier()"
+          }
+        },
+        {
+          "name": "POST /api/posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{admin_token}}"},
-              {"key": "Content-Type", "value": "application/json"}
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ]
+            },
+            "description": "PostController::create()",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"statutVerification\": \"VERIFIE\"\n}"
+              "raw": "{\n  \"name\": \"Quartier de test\",\n  \"description\": \"Cree par la collection Postman\",\n  \"address\": \"Paris\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/posts/{id}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "1"
+              ]
             },
-            "url": {"raw": "{{base_url}}/api/admin/users/1/verify", "host": ["{{base_url}}"], "path": ["api", "admin", "users", "1", "verify"]}
+            "description": "PostController::delete()"
+          }
+        },
+        {
+          "name": "POST /api/posts/{id}/like",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/1/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "1",
+                "like"
+              ]
+            },
+            "description": "PostController::toggleLike()"
+          }
+        },
+        {
+          "name": "GET /api/posts/{id}/comments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/1/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "1",
+                "comments"
+              ]
+            },
+            "description": "PostController::getComments()"
+          }
+        },
+        {
+          "name": "POST /api/posts/{id}/comments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/1/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "1",
+                "comments"
+              ]
+            },
+            "description": "PostController::addComment()",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Commentaire de test\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/posts/{id}/comments/{commentId}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/1/comments/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "1",
+                "comments",
+                "1"
+              ]
+            },
+            "description": "PostController::deleteComment()"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Message",
+      "item": [
+        {
+          "name": "GET /api/messages/contacts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/messages/contacts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "messages",
+                "contacts"
+              ]
+            },
+            "description": "MessageController::contacts()"
+          }
+        },
+        {
+          "name": "GET /api/messages/{userId}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/messages/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "messages",
+                "1"
+              ]
+            },
+            "description": "MessageController::conversation()"
+          }
+        },
+        {
+          "name": "POST /api/messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "pm.test(\"statut documente\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "messages"
+              ]
+            },
+            "description": "MessageController::send()",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receiverId\": 1,\n  \"content\": \"Bonjour depuis Postman\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "GET /api/admin/quartier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/quartier",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "quartier"
+              ]
+            },
+            "description": "AdminController::myQuartier()"
+          }
+        },
+        {
+          "name": "PUT /api/admin/quartier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/quartier",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "quartier"
+              ]
+            },
+            "description": "AdminController::updateQuartier()",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nom modifie\",\n  \"description\": \"Description modifiee\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /api/admin/banner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banner",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banner"
+              ]
+            },
+            "description": "AdminController::uploadBanner()"
+          }
+        },
+        {
+          "name": "GET /api/admin/join-requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/join-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "join-requests"
+              ]
+            },
+            "description": "AdminController::joinRequests()"
+          }
+        },
+        {
+          "name": "PUT /api/admin/join-requests/{id}/approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/join-requests/1/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "join-requests",
+                "1",
+                "approve"
+              ]
+            },
+            "description": "AdminController::approveJoin()"
+          }
+        },
+        {
+          "name": "PUT /api/admin/join-requests/{id}/reject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/join-requests/1/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "join-requests",
+                "1",
+                "reject"
+              ]
+            },
+            "description": "AdminController::rejectJoin()"
+          }
+        },
+        {
+          "name": "GET /api/admin/members",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members"
+              ]
+            },
+            "description": "AdminController::members()"
+          }
+        },
+        {
+          "name": "PUT /api/admin/members/{userId}/promote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/members/1/promote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members",
+                "1",
+                "promote"
+              ]
+            },
+            "description": "AdminController::promoteMember()"
+          }
+        },
+        {
+          "name": "PUT /api/admin/members/{userId}/demote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/members/1/demote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members",
+                "1",
+                "demote"
+              ]
+            },
+            "description": "AdminController::demoteMember()"
+          }
+        },
+        {
+          "name": "DELETE /api/admin/members/{userId}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/members/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members",
+                "1"
+              ]
+            },
+            "description": "AdminController::removeMember()"
+          }
+        },
+        {
+          "name": "GET /api/admin/verifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/verifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "verifications"
+              ]
+            },
+            "description": "AdminController::verifications()"
+          }
+        },
+        {
+          "name": "PUT /api/admin/verifications/{userId}/approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/verifications/1/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "verifications",
+                "1",
+                "approve"
+              ]
+            },
+            "description": "AdminController::approveVerification()"
+          }
+        },
+        {
+          "name": "PUT /api/admin/verifications/{userId}/reject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/verifications/1/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "verifications",
+                "1",
+                "reject"
+              ]
+            },
+            "description": "AdminController::rejectVerification()"
+          }
+        }
+      ]
+    },
+    {
+      "name": "SuperAdmin",
+      "item": [
+        {
+          "name": "GET /api/super-admin/proofs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/proofs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "proofs"
+              ]
+            },
+            "description": "SuperAdminController::pendingProofs()"
+          }
+        },
+        {
+          "name": "PUT /api/super-admin/proofs/{userId}/approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/proofs/1/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "proofs",
+                "1",
+                "approve"
+              ]
+            },
+            "description": "SuperAdminController::approveProof()"
+          }
+        },
+        {
+          "name": "PUT /api/super-admin/proofs/{userId}/reject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/proofs/1/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "proofs",
+                "1",
+                "reject"
+              ]
+            },
+            "description": "SuperAdminController::rejectProof()"
+          }
+        },
+        {
+          "name": "GET /api/super-admin/quartiers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/quartiers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "quartiers"
+              ]
+            },
+            "description": "SuperAdminController::pendingQuartiers()"
+          }
+        },
+        {
+          "name": "PUT /api/super-admin/quartiers/{id}/approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/quartiers/1/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "quartiers",
+                "1",
+                "approve"
+              ]
+            },
+            "description": "SuperAdminController::approveQuartier()"
+          }
+        },
+        {
+          "name": "PUT /api/super-admin/quartiers/{id}/reject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/quartiers/1/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "quartiers",
+                "1",
+                "reject"
+              ]
+            },
+            "description": "SuperAdminController::rejectQuartier()"
+          }
+        },
+        {
+          "name": "GET /api/super-admin/quartier-updates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/quartier-updates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "quartier-updates"
+              ]
+            },
+            "description": "SuperAdminController::pendingQuartierUpdates()"
+          }
+        },
+        {
+          "name": "PUT /api/super-admin/quartier-updates/{id}/approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/quartier-updates/1/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "quartier-updates",
+                "1",
+                "approve"
+              ]
+            },
+            "description": "SuperAdminController::approveQuartierUpdate()"
+          }
+        },
+        {
+          "name": "PUT /api/super-admin/quartier-updates/{id}/reject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/quartier-updates/1/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "quartier-updates",
+                "1",
+                "reject"
+              ]
+            },
+            "description": "SuperAdminController::rejectQuartierUpdate()"
+          }
+        },
+        {
+          "name": "GET /api/super-admin/users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Aucune route ne doit renvoyer d'erreur serveur : un 5xx revele",
+                  "// un defaut de code, pas un refus d'acces.",
+                  "pm.test(\"pas d'erreur serveur\", () => pm.expect(pm.response.code).to.be.below(500));",
+                  "// Compte de test : simple utilisateur, non verifie, sans role admin.",
+                  "// L'API doit donc refuser l'acces — c'est le controle d'acces qui",
+                  "// est verifie ici, pas le contenu de la reponse.",
+                  "pm.test(\"acces refuse a un compte non autorise\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "super-admin",
+                "users"
+              ]
+            },
+            "description": "SuperAdminController::users()"
           }
         }
       ]
     }
   ],
-  "variable": [
-    {"key": "base_url", "value": "http://localhost:8000"},
-    {"key": "jwt_token", "value": ""},
-    {"key": "admin_token", "value": ""}
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Genere une adresse unique au premier appel de l'execution.",
+          "// Sans cela, « POST /register » renvoie 409 des la seconde fois",
+          "// et la collection n'est plus rejouable.",
+          "if (!pm.collectionVariables.get('emailExecution')) {",
+          "    const suffixe = Date.now().toString(36);",
+          "    pm.collectionVariables.set('emailExecution', `postman.${suffixe}@exemple.fr`);",
+          "}",
+          "pm.collectionVariables.set('email', pm.collectionVariables.get('emailExecution'));"
+        ]
+      }
+    }
   ]
 }

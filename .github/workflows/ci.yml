@@ -39,6 +39,18 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
+      - name: Auditer les dependances PHP
+        working-directory: backend
+        run: composer audit --locked --no-interaction
+
+      - name: Auditer les dependances JavaScript
+        working-directory: frontend
+        # --audit-level=high : les failles moyennes et faibles connues se
+        # trouvent dans des outils de developpement (Vitest, esbuild) qui
+        # ne partent pas dans le bundle livre. Les signaler ferait echouer
+        # la CI sans risque reel ; on ne bloque que sur high et critical.
+        run: npm audit --audit-level=high
+
   # ── Tests backend ────────────────────────────────────────────
   phpunit:
     name: Tests backend (PHPUnit)
