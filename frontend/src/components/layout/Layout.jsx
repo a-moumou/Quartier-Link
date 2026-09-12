@@ -23,11 +23,25 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-[#e6edf3]">
+      {/* RGAA 12.7 — lien d'evitement. Invisible a la souris, il apparait
+          des la premiere tabulation et permet de sauter la navigation
+          pour atteindre directement le contenu. Sans lui, un utilisateur
+          au clavier ou au lecteur d'ecran retraverse toute la barre
+          laterale a chaque changement de page. */}
+      <a
+        href="#contenu-principal"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50
+                   focus:rounded-md focus:bg-emerald-500 focus:px-4 focus:py-2
+                   focus:text-sm focus:font-medium focus:text-white focus:shadow-lg"
+      >
+        Aller au contenu principal
+      </a>
+
       <Sidebar />
 
       <div className="lg:pl-64">
         <TopBar />
-        <main className={mainClass}>
+        <main id="contenu-principal" tabIndex={-1} className={mainClass}>
           <PageTransition />
         </main>
         <BottomNav />
