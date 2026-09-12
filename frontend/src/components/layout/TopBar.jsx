@@ -58,6 +58,12 @@ export default function TopBar() {
 
       {/* Desktop top bar */}
       <header className="hidden lg:flex sticky top-0 z-30 h-14 bg-[#0f1117]/85 backdrop-blur-md border-b border-[#30363d]/80 items-center px-8">
+        {/* La marque n'apparait ici qu'en pastille, sans le nom : celui-ci
+            est deja affiche dans la barre laterale, juste a gauche. Le
+            repeter en toutes lettres donnerait deux fois « QuartierLink »
+            sur la meme ligne. */}
+        <Logo to="/dashboard" size="xs" showText={false} className="mr-3" />
+        <span className="h-5 w-px bg-[#30363d] mr-3" aria-hidden="true" />
         <h1 className="text-base font-semibold text-[#e6edf3] tracking-tight">{title}</h1>
         <div className="ml-auto flex items-center gap-1">
           <button
