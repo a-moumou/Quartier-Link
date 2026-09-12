@@ -17,10 +17,47 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
+  // RGAA 7.x — une boite de dialogue doit retenir le focus. Sans piege,
+  // la tabulation passe derriere la fenetre et l'utilisateur au clavier
+  // parcourt une page qu'il ne voit plus.
   useEffect(() => {
-    const fn = (e) => { if (e.key === 'Escape') onClose?.(); };
-    if (isOpen) window.addEventListener('keydown', fn);
-    return () => window.removeEventListener('keydown', fn);
+    if (!isOpen) return undefined;
+
+    avant.current = document.activeElement;
+
+    const focusables = () => Array.from(
+      boite.current?.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), ' +
+        'textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    );
+
+    focusables()[0]?.focus();
+
+    const fn = (e) => {
+      if (e.key === 'Escape') { onClose?.(); return; }
+      if (e.key !== 'Tab') return;
+
+      const liste = focusables();
+      if (liste.length === 0) return;
+      const premier = liste[0];
+      const dernier = liste[liste.length - 1];
+
+      if (e.shiftKey && document.activeElement === premier) {
+        e.preventDefault();
+        dernier.focus();
+      } else if (!e.shiftKey && document.activeElement === dernier) {
+        e.preventDefault();
+        premier.focus();
+      }
+    };
+
+    window.addEventListener('keydown', fn);
+    return () => {
+      window.removeEventListener('keydown', fn);
+      // Le focus revient a l'element qui a ouvert la modale.
+      if (avant.current instanceof HTMLElement) avant.current.focus();
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
