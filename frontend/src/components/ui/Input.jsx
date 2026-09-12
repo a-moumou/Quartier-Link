@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 export default function Input({
   label,
   error,
@@ -8,6 +10,13 @@ export default function Input({
   rows = 3,
   ...props
 }) {
+  // RGAA 11.1 : chaque champ doit avoir une etiquette qui lui est
+  // rattachee. Sans ce lien, un lecteur d'ecran annonce « champ de
+  // saisie » sans dire de quoi il s'agit, et cliquer sur le libelle
+  // ne place pas le curseur dans le champ.
+  const idAuto  = useId();
+  const idChamp = props.id ?? idAuto;
+  const idAide  = `${idChamp}-aide`;
   const base = [
     'w-full rounded-md text-sm text-[#e6edf3] bg-[#0f1117]',
     'border border-[#30363d]',
@@ -24,7 +33,9 @@ export default function Input({
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-xs font-medium text-[#e6edf3]">{label}</label>
+        <label htmlFor={idChamp} className="text-xs font-medium text-[#e6edf3]">
+          {label}
+        </label>
       )}
       <div className="relative">
         {Icon && (
@@ -33,12 +44,25 @@ export default function Input({
           </span>
         )}
         {textarea
-          ? <textarea className={base} rows={rows} {...props} />
-          : <input className={base} {...props} />
+          ? <textarea
+              id={idChamp}
+              className={base}
+              rows={rows}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error || hint ? idAide : undefined}
+              {...props}
+            />
+          : <input
+              id={idChamp}
+              className={base}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error || hint ? idAide : undefined}
+              {...props}
+            />
         }
       </div>
-      {error && <p className="text-xs text-red-400">{error}</p>}
-      {hint && !error && <p className="text-xs text-[#8b949e]">{hint}</p>}
+      {error && <p id={idAide} className="text-xs text-red-400" role="alert">{error}</p>}
+      {hint && !error && <p id={idAide} className="text-xs text-[#8b949e]">{hint}</p>}
     </div>
   );
 }
