@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 const sizes = {
   sm: 'max-w-sm',
@@ -9,6 +9,9 @@ const sizes = {
 };
 
 export default function Modal({ isOpen, onClose, title, children, size = 'md', footer }) {
+  const boite    = useRef(null);
+  const avant    = useRef(null);
+  const idTitre  = useId();
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -27,8 +30,13 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
       <div
         className="absolute inset-0 bg-black/75"
         onClick={onClose}
+        aria-hidden="true"
       />
       <div
+        ref={boite}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? idTitre : undefined}
         className={[
           'relative bg-[#161b22] border border-[#30363d] rounded-xl shadow-2xl shadow-black/60',
           'w-full max-h-[90vh] flex flex-col ql-fade-up',
@@ -37,7 +45,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
       >
         {title && (
           <div className="flex items-center justify-between px-5 py-4 border-b border-[#30363d] shrink-0">
-            <h2 className="text-sm font-semibold text-[#e6edf3]">{title}</h2>
+            <h2 id={idTitre} className="text-sm font-semibold text-[#e6edf3]">{title}</h2>
             <button
               onClick={onClose}
               className="p-1 rounded-md hover:bg-[#21262d] text-[#8b949e] hover:text-[#e6edf3] transition-colors"
