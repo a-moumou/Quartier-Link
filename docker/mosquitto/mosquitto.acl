@@ -1,0 +1,13 @@
+# Droits par utilisateur — QuartierLink
+#
+# backend  : publie les messages, c'est le seul emetteur legitime
+# webapp   : identifiants embarques dans le bundle du navigateur.
+#            Abonnement seul, et uniquement sur chat/<id> : le joker « # »
+#            est refuse, ce qui interdit d'aspirer tout le trafic.
+
+user backend
+topic write chat/+
+topic read  chat/+
+
+user webapp
+topic read chat/+

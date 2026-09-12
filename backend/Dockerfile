@@ -29,6 +29,12 @@ COPY . .
 RUN composer dump-autoload --optimize \
   && mkdir -p var/cache var/log \
   && chmod -R 777 var \
+  # PHP-FPM tourne sous www-data : sans cette appartenance, tout cache
+  # recree par une commande lancee en root (cache:warmup) devient
+  # inaccessible en ecriture, et les compteurs du rate limiter sont
+  # silencieusement perdus a chaque requete.
+  && mkdir -p public/uploads/proofs \
+  && chown -R www-data:www-data var public/uploads \
   && find config src public -type f -exec chmod 644 {} \; \
   && find config src public -type d -exec chmod 755 {} \;
 

@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/auth')]
@@ -127,15 +129,48 @@ class AuthController extends AbstractController
         Request $request,
         UserRepository $userRepo,
         UserPasswordHasherInterface $hasher,
-        JWTTokenManagerInterface $jwtManager
+        JWTTokenManagerInterface $jwtManager,
+        #[Autowire(service: 'limiter.login_ip')]
+        RateLimiterFactoryInterface $limiteurIp,
+        #[Autowire(service: 'limiter.login_email')]
+        RateLimiterFactoryInterface $limiteurEmail,
     ): JsonResponse {
-        $data = json_decode($request->getContent(), true);
+        $data  = json_decode($request->getContent(), true);
+        $email = strtolower(trim((string) ($data['email'] ?? '')));
 
-        $user = $userRepo->findOneBy(['email' => $data['email'] ?? '']);
+        // Deux compteurs : l'un par adresse IP, l'autre par compte vise.
+        // Le second protege un utilisateur precis meme si l'attaquant
+        // change d'adresse a chaque tentative.
+        $parIp    = $limiteurIp->create($request->getClientIp() ?? 'inconnu');
+        $parEmail = $limiteurEmail->create($email !== '' ? $email : 'vide');
+
+        foreach ([$parIp, $parEmail] as $limiteur) {
+            $limite = $limiteur->consume();
+            if (!$limite->isAccepted()) {
+                $attente = max(1, $limite->getRetryAfter()->getTimestamp() - time());
+
+                return $this->json(
+                    [
+                        'message'     => 'Trop de tentatives de connexion. Réessayez dans '
+                                         . ceil($attente / 60) . ' minute(s).',
+                        'retry_after' => $attente,
+                    ],
+                    Response::HTTP_TOO_MANY_REQUESTS,
+                    ['Retry-After' => (string) $attente],
+                );
+            }
+        }
+
+        $user = $userRepo->findOneBy(['email' => $email]);
 
         if (!$user || !$hasher->isPasswordValid($user, $data['password'] ?? '')) {
             return $this->json(['message' => 'Email ou mot de passe incorrect.'], Response::HTTP_UNAUTHORIZED);
         }
+
+        // Connexion reussie : on remet les compteurs a zero pour ne pas
+        // penaliser un utilisateur legitime qui s'est trompe deux fois.
+        $parIp->reset();
+        $parEmail->reset();
 
         $token = $jwtManager->create($user);
 

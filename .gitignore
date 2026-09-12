@@ -9,7 +9,12 @@ skills-lock.json
 **/.DS_Store
 
 # Secrets et configuration locale
-docker-compose.yml
+# Le .env de la racine alimente docker-compose : il contient les vraies
+# valeurs et ne doit jamais etre versionne. Le modele .env.example, lui,
+# est suivi par git.
+/.env
+/.env.local
+!/.env.example
 docker-compose.override.yml
 backend/.env
 backend/.env.local
@@ -24,3 +29,11 @@ backend/vendor/
 backend/var/
 frontend/node_modules/
 frontend/dist/
+
+# Fichier de mots de passe du broker MQTT : genere par mosquitto_passwd,
+# propre a chaque environnement, ne doit jamais etre versionne.
+/docker/mosquitto/passwd
+
+# Variables de build du frontend : contiennent les identifiants MQTT
+# du navigateur, differents selon l'environnement.
+/frontend/.env.production

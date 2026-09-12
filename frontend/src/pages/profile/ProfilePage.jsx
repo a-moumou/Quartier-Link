@@ -382,21 +382,25 @@ export default function ProfilePage() {
                   </div>
                   <button
                     onClick={() => setPrivacy((p) => ({ ...p, [key]: !p[key] }))}
-                    style={{ width: 38, height: 22 }}
                     className={[
-                      'relative rounded-full transition-colors shrink-0 border',
+                      'relative h-6 w-11 shrink-0 rounded-full border transition-colors',
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40',
                       privacy[key]
                         ? 'bg-emerald-500 border-emerald-500'
                         : 'bg-[#21262d] border-[#30363d]',
                     ].join(' ')}
                     aria-pressed={privacy[key]}
+                    aria-label={label}
                   >
+                    {/* La pastille est positionnee en « left », borne par la
+                        largeur de la piste : elle ne peut pas deborder, quelle
+                        que soit la taille de police heritee. */}
                     <span
-                      style={{
-                        width: 16, height: 16, top: 2,
-                        transform: `translateX(${privacy[key] ? 19 : 2}px)`,
-                      }}
-                      className="absolute bg-white rounded-full shadow transition-transform"
+                      className={[
+                        'absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full',
+                        'bg-white shadow transition-all duration-200',
+                        privacy[key] ? 'left-[calc(100%-1.125rem)]' : 'left-0.5',
+                      ].join(' ')}
                     />
                   </button>
                 </div>

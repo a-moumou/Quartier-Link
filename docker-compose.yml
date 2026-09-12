@@ -1,0 +1,137 @@
+services:
+
+  # ─── PostgreSQL ───────────────────────────────────────────
+  database:
+    container_name: quartierlink-database
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Exposé uniquement sur la boucle locale, pour pgAdmin ou tout autre
+    # client graphique. Le port 5432 de la machine étant déjà pris par
+    # Postgres.app, on publie sur 5433.
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 5s
+      retries: 10
+    networks:
+      - ql_network
+
+  # ─── MQTT Mosquitto ───────────────────────────────────────
+  mosquitto:
+    container_name: quartierlink-mosquitto
+    image: eclipse-mosquitto:2
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./docker/mosquitto/mosquitto.acl:/mosquitto/config/acl:ro
+      - ./docker/mosquitto/passwd:/mosquitto/config/passwd:ro
+    ports:
+      - "1883:1883"   # MQTT
+      - "9001:9001"   # WebSocket
+    networks:
+      - ql_network
+
+  # ─── Backend Symfony (PHP-FPM) ────────────────────────────
+  backend:
+    container_name: quartierlink-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      MQTT_HOST: ${MQTT_HOST}
+      MQTT_PORT: ${MQTT_PORT}
+      MESSAGES_ENCRYPTION_KEY: ${MESSAGES_ENCRYPTION_KEY}
+      MAILER_DSN: ${MAILER_DSN}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
+      DEFAULT_URI: ${DEFAULT_URI}
+      MQTT_USER: ${MQTT_USER}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+    volumes:
+      - backend_code:/var/www/html
+      - uploads_data:/var/www/html/public/uploads
+      - ./docker/php/prod.ini:/usr/local/etc/php/conf.d/zz-prod.ini:ro
+    depends_on:
+      database:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    networks:
+      - ql_network
+
+  # ─── Nginx (reverse proxy pour Symfony) ──────────────────
+  nginx:
+    container_name: quartierlink-nginx
+    image: nginx:alpine
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - backend_code:/var/www/html:ro
+      - uploads_data:/var/www/html/public/uploads:ro
+    ports:
+      - "8000:80"
+    depends_on:
+      - backend
+    networks:
+      - ql_network
+
+  # ─── Frontend React ───────────────────────────────────────
+  frontend:
+    container_name: quartierlink-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - nginx
+    networks:
+      - ql_network
+
+  # ─── Mailpit (emails de dev) ──────────────────────────────
+  mailer:
+    container_name: quartierlink-mailer
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"   # Interface web
+      - "1025:1025"   # SMTP
+    networks:
+      - ql_network
+
+  # ─── Test Runner (à la demande : docker compose --profile test up tests) ──
+  tests:
+    container_name: quartierlink-tests
+    build:
+      context: ./docker/tests
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/workspace-src/backend:ro
+      - ./frontend:/workspace-src/frontend:ro
+      - ./postman:/workspace-src/postman:ro
+      - test_app:/app
+      - test_report:/report
+    ports:
+      - "8090:8090"
+    networks:
+      - ql_network
+    profiles: ["test"]
+
+volumes:
+  db_data:
+  uploads_data:
+  backend_code:
+  test_app:
+  test_report:
+
+networks:
+  ql_network:
+    driver: bridge

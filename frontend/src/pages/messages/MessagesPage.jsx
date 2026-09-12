@@ -8,7 +8,11 @@ import Button from '../../components/ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
-const MQTT_URL = import.meta.env.VITE_MQTT_URL ?? 'ws://localhost:9001';
+const MQTT_URL  = import.meta.env.VITE_MQTT_URL ?? 'ws://localhost:9001';
+// Le broker refuse les connexions anonymes : ces identifiants n'autorisent
+// que l'abonnement aux sujets chat/, jamais la publication.
+const MQTT_USER = import.meta.env.VITE_MQTT_USER ?? '';
+const MQTT_PASS = import.meta.env.VITE_MQTT_PASSWORD ?? '';
 
 function timeAgo(d) {
   const s = (Date.now() - new Date(d)) / 1000;
@@ -218,7 +222,10 @@ export default function MessagesPage() {
   useEffect(() => {
     if (!user?.id) return;
 
-    const client = mqtt.connect(MQTT_URL, { clientId: `ql-${user.id}-${Date.now()}` });
+    const client = mqtt.connect(MQTT_URL, {
+      clientId: `ql-${user.id}-${Date.now()}`,
+      ...(MQTT_USER ? { username: MQTT_USER, password: MQTT_PASS } : {}),
+    });
     mqttRef.current = client;
 
     client.on('connect', () => {

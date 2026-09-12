@@ -1,0 +1,33 @@
+# Limitation des tentatives de connexion — QuartierLink
+#
+# Sans cette limite, rien n'empeche d'essayer des centaines de milliers de
+# mots de passe contre un compte connu : l'API repond 401 aussi vite qu'on
+# l'interroge.
+#
+# Fenetre glissante plutot que fenetre fixe : avec une fenetre fixe, un
+# attaquant peut envoyer la totalite du quota juste avant la bascule, puis
+# la totalite du suivant juste apres — soit le double de tentatives en
+# quelques secondes. La fenetre glissante lisse le comptage sur l'intervalle.
+#
+# Deux limiteurs complementaires :
+#   login_ip     10 essais / 15 min par adresse IP
+#                -> freine une machine qui balaie de nombreux comptes
+#   login_email   5 essais / 15 min par compte vise
+#                -> protege un compte precis, meme si l'attaquant change d'IP
+
+framework:
+    rate_limiter:
+        login_ip:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '15 minutes'
+            # Sans reservoir persistant, les compteurs vivent en memoire et
+            # disparaissent a la fin de chaque requete PHP-FPM : la limite
+            # ne s'appliquerait jamais entre deux appels HTTP.
+            cache_pool: 'cache.app'
+
+        login_email:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '15 minutes'
+            cache_pool: 'cache.app'

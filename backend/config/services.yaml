@@ -2,6 +2,8 @@ parameters:
     app.messages_encryption_key: '%env(MESSAGES_ENCRYPTION_KEY)%'
     app.mqtt_host: '%env(string:MQTT_HOST)%'
     app.mqtt_port: '%env(int:MQTT_PORT)%'
+    app.mqtt_user: '%env(string:MQTT_USER)%'
+    app.mqtt_password: '%env(string:MQTT_PASSWORD)%'
 
 services:
     _defaults:
@@ -28,3 +30,5 @@ services:
         arguments:
             $mqttHost: '%app.mqtt_host%'
             $mqttPort: '%app.mqtt_port%'
+            $mqttUser: '%app.mqtt_user%'
+            $mqttPassword: '%app.mqtt_password%'
