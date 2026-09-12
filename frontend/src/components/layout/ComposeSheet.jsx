@@ -34,7 +34,8 @@ export default function ComposeSheet({
                     <select
                       value={quartierId}
                       onChange={(e) => onQuartierChange(e.target.value)}
-                      className="text-xs text-emerald-400 bg-transparent border-none focus:outline-none cursor-pointer mt-0.5 max-w-full"
+                      className="text-xs text-emerald-400 bg-transparent border-none cursor-pointer mt-0.5 max-w-full
+                                 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
                     >
                       {quartiers.map((q) => (
                         <option key={q.id} value={String(q.id)} className="bg-[#0f1117]">
